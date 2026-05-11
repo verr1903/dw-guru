@@ -1,0 +1,78 @@
+* {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background: #f8f3eb;
+        }
+
+        .font-display {
+            font-family: 'DM Serif Display', serif;
+        }
+
+        #particles-js {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background: linear-gradient(145deg, #f7f7f7 0%, #fcf9f4 80%, #f8f7f5 100%);
+        }
+
+        .page-layer {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        @keyframes float-up {
+            from {
+                opacity: 0;
+                transform: translateY(28px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-enter {
+            animation: float-up 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .card-top-bar {
+            background: linear-gradient(90deg, #5a1f1b 0%, #d4af37 50%, #5a1f1b 100%);
+            background-size: 200% 100%;
+            animation: shimmer 4s linear infinite;
+        }
+
+        @keyframes shimmer {
+            from {
+                background-position: 200% 0;
+            }
+
+            to {
+                background-position: -200% 0;
+            }
+        }
+
+        .input-field {
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #b68b2c;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.22);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(20px) saturate(1.6);
+            -webkit-backdrop-filter: blur(20px) saturate(1.6);
+        }
