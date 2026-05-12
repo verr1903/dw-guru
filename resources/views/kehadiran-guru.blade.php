@@ -59,14 +59,14 @@
         {{-- Total Guru --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Guru</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">{{ $totalGuru }}</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ $guruAktif }}</p>
             <p class="text-xs text-gray-400 mt-1">Tenaga Pengajar</p>
         </div>
 
         {{-- Kehadiran --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Tingkat Kehadiran</p>
-            <p class="text-3xl font-bold text-emerald-500 mt-2">{{ $persenKehadiran }}%</p>
+            <p class="text-3xl font-bold text-emerald-500 mt-2">{{ number_format($kehadiranRataRata, 2) }}%</p>
             <div class="mt-2 w-full bg-gray-100 rounded-full h-1.5">
                 <div class="bg-emerald-500 h-1.5 rounded-full" style="width: {{ $persenKehadiran }}%"></div>
             </div>
@@ -84,11 +84,11 @@
 
         {{-- Guru Izin --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Izin/Sakit</p>
+            <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Izin</p>
             <p class="text-3xl font-bold text-amber-500 mt-2">{{ $totalIzinSakit }}</p>
             <p class="text-xs text-amber-600 font-medium mt-1 flex items-center gap-1">
                 <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
-                Hari izin + sakit
+                Hari izin
             </p>
         </div>
 
@@ -155,21 +155,22 @@
     </div>
 
     {{-- Table: Detail Kehadiran Guru --}}
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <div id="detail-kehadiran" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 border-b border-gray-100">
             <h2 class="text-base font-semibold text-gray-900">Detail Kehadiran Guru</h2>
-            <form method="GET" action="{{ route('kehadiran-guru') }}" class="flex items-center gap-3">
-                <input type="hidden" name="tahun" value="{{ $tahun }}">
-                <input type="hidden" name="bulan" value="{{ $bulan }}">
+            <div class="flex items-center gap-3">
                 <div class="relative">
-                    <input type="text" name="search" value="{{ $search }}" placeholder="Cari guru..."
+                    <input
+                        type="text"
+                        id="searchGuru"
+                        value="{{ $search }}"
+                        placeholder="Cari guru..."
                         class="bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 w-44">
                     <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
-                <button type="submit" class="bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all">Cari</button>
-            </form>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
@@ -189,7 +190,8 @@
                     @php
                         $totalAbsenGuru = $guru->total_sakit + $guru->total_izin + $guru->total_alpa;
                     @endphp
-                    <tr class="hover:bg-gray-50 transition-colors">
+                    <tr class="hover:bg-gray-50 transition-colors"
+                        data-nama="{{ strtolower($guru->nama_guru) }}">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold shrink-0">
@@ -232,7 +234,7 @@
                         </td>
                     </tr>
                     @empty
-                    <tr>
+                    <tr id="emptyRow">
                         <td colspan="6" class="px-6 py-8 text-center text-gray-400">Tidak ada data kehadiran.</td>
                     </tr>
                     @endforelse
@@ -241,8 +243,39 @@
         </div>
 
         {{-- Pagination --}}
-        <div class="px-6 py-4 border-t border-gray-100">
-            {{ $ringkasanGuru->appends(['tahun' => $tahun, 'bulan' => $bulan, 'search' => $search])->links() }}
+        <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+            <p class="text-xs text-gray-500">
+                Menampilkan {{ $ringkasanGuru->count() }} dari {{ $ringkasanGuru->total() }} guru
+            </p>
+
+            <div class="flex items-center gap-1">
+
+                {{-- Previous --}}
+                @if ($ringkasanGuru->onFirstPage())
+                <span class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 cursor-not-allowed">...</span>
+                @else
+                <a href="{{ $ringkasanGuru->previousPageUrl() }}#detail-kehadiran"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100">...</a>
+                @endif
+
+                {{-- Page Numbers --}}
+                @for ($i = 1; $i <= $ringkasanGuru->lastPage(); $i++)
+                <a href="{{ $ringkasanGuru->url($i) }}#detail-kehadiran"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium
+                    {{ $ringkasanGuru->currentPage() == $i ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100' }}">
+                    {{ $i }}
+                </a>
+                @endfor
+
+                {{-- Next --}}
+                @if ($ringkasanGuru->hasMorePages())
+                <a href="{{ $ringkasanGuru->nextPageUrl() }}#detail-kehadiran"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100">...</a>
+                @else
+                <span class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 cursor-not-allowed">...</span>
+                @endif
+
+            </div>
         </div>
     </div>
 
@@ -352,6 +385,32 @@
         function exportExcel() {
             alert('Data kehadiran sedang diekspor ke Excel...');
         }
+
+        // tabel
+        const searchGuru = document.getElementById('searchGuru');
+        const tableRows  = document.querySelectorAll('tbody tr[data-nama]');
+        const emptyRow   = document.getElementById('emptyRow');
+
+        function filterTable() {
+            const keyword = searchGuru.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            tableRows.forEach(row => {
+                const nama = row.dataset.nama.toLowerCase();
+                if (nama.includes(keyword)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (emptyRow) {
+                emptyRow.style.display = visibleCount === 0 ? '' : 'none';
+            }
+        }
+
+        searchGuru.addEventListener('input', filterTable);
     </script>
     @endpush
 

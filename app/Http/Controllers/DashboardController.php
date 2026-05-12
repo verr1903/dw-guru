@@ -54,10 +54,30 @@ class DashboardController extends Controller
         $kehadiranRataRata = round((($totalHariKerja - $totalAbsen) / $totalHariKerja) * 100, 2);
 
         // Guru aktif tahun ini
-        $guruAktif = DataGuru::where('periode_tahun', $tahun)->count();
+        // Guru aktif tahun ini — gabungan dari DataGuru + DataAbsensiGuru
+        $guruAktif = DB::table(function ($query) use ($tahun) {
+            $query->select('nama_guru')
+                ->from('data_guru')
+                ->where('periode_tahun', $tahun)
+                ->union(
+                    DB::table('data_absensi_guru')
+                        ->select('nama_guru')
+                        ->where('periode_tahun', $tahun)
+                );
+        }, 'gabungan')->distinct()->count('nama_guru');
 
-        // Guru aktif tahun lalu untuk perbandingan
-        $guruAktifTahunLalu = DataGuru::where('periode_tahun', $tahun - 1)->count();
+        // Guru aktif tahun lalu — sama, untuk perbandingan
+        $guruAktifTahunLalu = DB::table(function ($query) use ($tahun) {
+            $query->select('nama_guru')
+                ->from('data_guru')
+                ->where('periode_tahun', $tahun - 1)
+                ->union(
+                    DB::table('data_absensi_guru')
+                        ->select('nama_guru')
+                        ->where('periode_tahun', $tahun - 1)
+                );
+        }, 'gabungan')->distinct()->count('nama_guru');
+
         $selisihGuruAktif = $guruAktif - $guruAktifTahunLalu;
 
         // Total prestasi
@@ -66,12 +86,28 @@ class DashboardController extends Controller
         $selisihPrestasi = $totalPrestasi - $totalPrestasiTahunLalu;
 
         // ===== CHART: Tren Jam Mengajar per Bulan =====
-        $trenJamPerBulan = DataAbsensiGuru::where('periode_tahun', $tahun)
-            ->selectRaw('periode_bulan, COUNT(DISTINCT nama_guru) as jumlah_guru')
-            ->groupBy('periode_bulan')
-            ->orderBy('periode_bulan')
-            ->pluck('jumlah_guru', 'periode_bulan')
-            ->toArray();
+        $trenJamPerBulan = DB::table('data_absensi_guru')
+    ->where('periode_tahun', $tahun)
+    ->selectRaw('periode_bulan, COUNT(DISTINCT nama_guru) as jumlah_guru')
+    ->groupBy('periode_bulan')
+    ->orderBy('periode_bulan')
+    ->pluck('jumlah_guru', 'periode_bulan')
+    ->toArray();
+
+// Tambahkan guru dari data_guru yang tidak ada di absensi ke setiap bulan
+$guruHanyaDiDataGuru = DB::table('data_guru')
+    ->where('periode_tahun', $tahun)
+    ->whereNotIn('nama_guru', function ($q) use ($tahun) {
+        $q->select('nama_guru')
+          ->from('data_absensi_guru')
+          ->where('periode_tahun', $tahun);
+    })
+    ->count();
+
+// Tambahkan selisih ke setiap bulan yang ada
+$trenJamPerBulan = collect($trenJamPerBulan)
+    ->map(fn($jumlah) => $jumlah + $guruHanyaDiDataGuru)
+    ->toArray();
 
         // Jam mengajar per guru per tahun (aggregate)
         $jamPerGuru = DataJamMengajarGuru::where('periode_tahun', $tahun)
@@ -85,37 +121,48 @@ class DashboardController extends Controller
         $mapel = $request->input('mapel');
 
         // TABLE: Rekap Kinerja Guru — sumber dari DataGuru (sama dengan guruAktif)
-        $guruQuery = DataGuru::where('data_guru.periode_tahun', $tahun)
-            ->leftJoin('data_jam_mengajar_guru', function ($join) use ($tahun) {
-                $join->on('data_guru.nama_guru', '=', 'data_jam_mengajar_guru.nama_guru')
-                    ->where('data_jam_mengajar_guru.periode_tahun', '=', $tahun);
-            })
-            ->selectRaw('
-        data_guru.nama_guru,
-        data_guru.bidang_studi,
-        data_guru.nip,
-        COALESCE(SUM(
-            data_jam_mengajar_guru.x_1 + data_jam_mengajar_guru.x_2 + data_jam_mengajar_guru.x_3 +
-            data_jam_mengajar_guru.xi_1 + data_jam_mengajar_guru.xi_2 + data_jam_mengajar_guru.xi_3 +
-            data_jam_mengajar_guru.xii_1 + data_jam_mengajar_guru.xii_2 + data_jam_mengajar_guru.xii_3 +
-            data_jam_mengajar_guru.sd + data_jam_mengajar_guru.smp + data_jam_mengajar_guru.slb
-        ), 0) as jam_total
-    ')
-            ->groupBy('data_guru.nama_guru', 'data_guru.bidang_studi', 'data_guru.nip');
+        $guruUnion = DB::table('data_guru')
+    ->select('nama_guru', 'bidang_studi', 'nip')
+    ->where('periode_tahun', $tahun)
+    ->union(
+        DB::table('data_absensi_guru')
+            ->select('nama_guru', DB::raw("'' as bidang_studi"), 'nip')
+            ->where('periode_tahun', $tahun)
+    );
 
-        if ($search) {
-            $guruQuery->where('data_guru.nama_guru', 'like', "%{$search}%");
-        }
-        if ($mapel) {
-            $guruQuery->where('data_guru.bidang_studi', 'like', "%{$mapel}%");
-        }
+// GROUP BY nama_guru saja agar tidak duplikat meski bidang_studi beda
+$guruQuery = DB::table(DB::raw("(SELECT nama_guru, MAX(bidang_studi) as bidang_studi, MAX(nip) as nip FROM ({$guruUnion->toSql()}) as u GROUP BY nama_guru) as gabungan"))
+    ->mergeBindings($guruUnion)
+    ->select(
+        'gabungan.nama_guru',
+        'gabungan.bidang_studi',
+        'gabungan.nip',
+        DB::raw('COALESCE(SUM(
+            j.x_1 + j.x_2 + j.x_3 +
+            j.xi_1 + j.xi_2 + j.xi_3 +
+            j.xii_1 + j.xii_2 + j.xii_3 +
+            j.sd + j.smp + j.slb
+        ), 0) as jam_total')
+    )
+    ->leftJoin('data_jam_mengajar_guru as j', function ($join) use ($tahun) {
+        $join->on('gabungan.nama_guru', '=', 'j.nama_guru')
+             ->where('j.periode_tahun', '=', $tahun);
+    })
+    ->groupBy('gabungan.nama_guru', 'gabungan.bidang_studi', 'gabungan.nip');
 
-        $guruData = $guruQuery->orderBy('data_guru.nama_guru')->paginate(10);
-        $guruData->appends([
-            'tahun'  => $tahun,
-            'search' => $search,
-            'mapel'  => $mapel,
-        ]);
+if ($search) {
+    $guruQuery->where('gabungan.nama_guru', 'like', "%{$search}%");
+}
+if ($mapel) {
+    $guruQuery->where('gabungan.bidang_studi', 'like', "%{$mapel}%");
+}
+
+$guruData = $guruQuery->orderBy('gabungan.nama_guru')->paginate(10);
+$guruData->appends([
+    'tahun'  => $tahun,
+    'search' => $search,
+    'mapel'  => $mapel,
+]);
 
         // Ambil kehadiran per guru
         $absensiPerGuru = DataAbsensiGuru::where('periode_tahun', $tahun)
