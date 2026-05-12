@@ -1,4 +1,4 @@
-<x-layout-auth title="Masuk — SMA Cendana Pekanbaru">
+<x-layout-auth title="Login — SMA Cendana Pekanbaru">
 
     <div class="w-full max-w-md card-enter">
 
@@ -144,7 +144,7 @@
         </div>
 
         <p class="mt-5 text-center text-xs text-slate-400">
-            Untuk bantuan login, hubungi administrator sekolah.
+            Untuk bantuan login, hubungi tata usaha sekolah.
         </p>
     </div>
 
