@@ -37,14 +37,6 @@
                     </div>
                 </div>
             </form>
-            {{-- Export Button --}}
-            <button onclick="exportExcel()"
-                class="bg-gray-900 hover:bg-gray-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow transition-all duration-150 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Export Excel
-            </button>
         </div>
     </div>
 
@@ -382,9 +374,6 @@
             });
         });
 
-        function exportExcel() {
-            alert('Data kehadiran sedang diekspor ke Excel...');
-        }
 
         // tabel
         const searchGuru = document.getElementById('searchGuru');

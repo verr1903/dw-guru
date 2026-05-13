@@ -21,13 +21,7 @@
                     </div>
                 </div>
             </form>
-            <button onclick="unduhLaporan()"
-                class="bg-gray-900 hover:bg-gray-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow transition-all duration-150 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Unduh Laporan
-            </button>
+            
         </div>
     </div>
 
@@ -230,7 +224,7 @@
                                 <span class="font-medium text-gray-800">{{ $guru->nama_guru }}</span>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-gray-600">{{ $guru->bidang_studi }}</td>
+                        <td class="px-6 py-4 text-gray-600">{{ $guru->bidang_studi ?: 'Tidak Diketahui' }}</td>
                         <td class="px-6 py-4 font-medium text-gray-800">{{ $guru->jam_total  }} jam</td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2">
@@ -460,10 +454,6 @@
             });
 
         });
-
-        function unduhLaporan() {
-            alert('Laporan sedang diunduh...');
-        }
 
         // ---- Realtime Search & Filter Tabel ----
         const searchInput = document.getElementById('searchGuru');

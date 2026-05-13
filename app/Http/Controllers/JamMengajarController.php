@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\DataJamMengajarGuru;
+use App\Models\DataGuru;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class JamMengajarController extends Controller
 {
-    /**
-     * Halaman jam mengajar
-     */
     public function index(Request $request)
     {
         $tahun = $request->input('tahun', 2024);
@@ -17,50 +16,100 @@ class JamMengajarController extends Controller
         $mapel = $request->input('mapel');
         $guru = $request->input('guru');
 
-        // ===== TABLE DATA =====
-        $query = DataJamMengajarGuru::where('periode_tahun', $tahun);
+        // ===== TABLE DATA — sumber dari UNION data_guru + data_jam_mengajar_guru =====
+        $guruUnion = DB::table('data_guru')
+            ->select('nama_guru', 'bidang_studi', 'nip')
+            ->where('periode_tahun', $tahun)
+            ->union(
+                DB::table('data_absensi_guru')
+                    ->select('nama_guru', DB::raw("'' as bidang_studi"), 'nip')
+                    ->where('periode_tahun', $tahun)
+            );
+
+        $jamQuery = DB::table(DB::raw("(SELECT nama_guru, MAX(bidang_studi) as bidang_studi, MAX(nip) as nip FROM ({$guruUnion->toSql()}) as u GROUP BY nama_guru) as gabungan"))
+            ->mergeBindings($guruUnion)
+            ->select(
+                'gabungan.nama_guru',
+                'gabungan.bidang_studi',
+                'gabungan.nip',
+                DB::raw('COALESCE(SUM(j.x_1), 0) as x_1'),
+                DB::raw('COALESCE(SUM(j.x_2), 0) as x_2'),
+                DB::raw('COALESCE(SUM(j.x_3), 0) as x_3'),
+                DB::raw('COALESCE(SUM(j.xi_1), 0) as xi_1'),
+                DB::raw('COALESCE(SUM(j.xi_2), 0) as xi_2'),
+                DB::raw('COALESCE(SUM(j.xi_3), 0) as xi_3'),
+                DB::raw('COALESCE(SUM(j.xii_1), 0) as xii_1'),
+                DB::raw('COALESCE(SUM(j.xii_2), 0) as xii_2'),
+                DB::raw('COALESCE(SUM(j.xii_3), 0) as xii_3'),
+                DB::raw('COALESCE(SUM(j.x_1 + j.x_2 + j.x_3 + j.xi_1 + j.xi_2 + j.xi_3 + j.xii_1 + j.xii_2 + j.xii_3), 0) as total_jam'),
+                DB::raw('COALESCE(MAX(j.periode_tahun), ' . $tahun . ') as periode_tahun')
+            )
+            ->leftJoin('data_jam_mengajar_guru as j', function ($join) use ($tahun) {
+                $join->on('gabungan.nama_guru', '=', 'j.nama_guru')
+                    ->where('j.periode_tahun', '=', $tahun);
+            })
+            ->groupBy('gabungan.nama_guru', 'gabungan.bidang_studi', 'gabungan.nip');
 
         if ($search) {
-            $query->where('nama_guru', 'like', "%{$search}%");
+            $jamQuery->where('gabungan.nama_guru', 'like', "%{$search}%");
         }
         if ($mapel) {
-            $query->where('bidang_studi', 'like', "%{$mapel}%");
+            $jamQuery->where('gabungan.bidang_studi', 'like', "%{$mapel}%");
         }
         if ($guru) {
-            $query->where('nama_guru', $guru);
+            $jamQuery->where('gabungan.nama_guru', $guru);
         }
 
-        $jamMengajarData = $query->orderBy('nama_guru')->paginate(15);
+        $jamMengajarData = $jamQuery->orderBy('gabungan.nama_guru')->paginate(15);
+        $jamMengajarData->appends([
+            'tahun'  => $tahun,
+            'search' => $search,
+            'mapel'  => $mapel,
+            'guru'   => $guru,
+        ]);
 
-        // ===== CHART DATA: Total jam per guru =====
+        // ===== CHART DATA =====
+        // ===== CHART DATA — gunakan accessor model =====
+
         $jamPerGuru = DataJamMengajarGuru::where('periode_tahun', $tahun)
-            ->selectRaw('nama_guru, SUM(x_1 + x_2 + x_3 + xi_1 + xi_2 + xi_3 + xii_1 + xii_2 + xii_3 + sd + smp + slb) as total_jam')
-            ->groupBy('nama_guru')
-            ->orderByDesc('total_jam')
-            ->limit(10)
-            ->get();
+            ->get()
+            ->map(fn($g) => [
+                'nama_guru' => $g->nama_guru,
+                'total_jam' => $g->total_jam, // ← accessor
+            ])
+            ->sortByDesc('total_jam')
+            ->take(10)
+            ->values();
 
-        // ===== CHART DATA: Total jam per bidang studi =====
         $jamPerMapel = DataJamMengajarGuru::where('periode_tahun', $tahun)
-            ->selectRaw('bidang_studi, SUM(x_1 + x_2 + x_3 + xi_1 + xi_2 + xi_3 + xii_1 + xii_2 + xii_3 + sd + smp + slb) as total_jam')
+            ->get()
             ->groupBy('bidang_studi')
-            ->orderByDesc('total_jam')
-            ->get();
+            ->map(fn($group, $mapel) => [
+                'bidang_studi' => $mapel,
+                'total_jam'    => $group->sum('total_jam'), // ← accessor per item
+            ])
+            ->sortByDesc('total_jam')
+            ->values();
 
-        // ===== CHART DATA: Tren per tahun =====
-        $trenPerTahun = DataJamMengajarGuru::selectRaw('periode_tahun, SUM(x_1 + x_2 + x_3 + xi_1 + xi_2 + xi_3 + xii_1 + xii_2 + xii_3 + sd + smp + slb) as total_jam')
-            ->groupBy('periode_tahun')
+        $trenPerTahun = DataJamMengajarGuru::select('periode_tahun')
+            ->distinct()
             ->orderBy('periode_tahun')
-            ->get();
+            ->pluck('periode_tahun')
+            ->map(fn($tahunItem) => [
+                'periode_tahun' => $tahunItem,
+                'total_jam'     => DataJamMengajarGuru::where('periode_tahun', $tahunItem)
+                    ->get()
+                    ->sum('total_jam'), // ← accessor
+            ])
+            ->values();
 
-        // Daftar guru dan mapel untuk filter
-        $daftarGuru = DataJamMengajarGuru::where('periode_tahun', $tahun)
+        $daftarGuru = DataGuru::where('periode_tahun', $tahun)
             ->select('nama_guru')
             ->distinct()
             ->orderBy('nama_guru')
             ->pluck('nama_guru');
 
-        $daftarMapel = DataJamMengajarGuru::where('periode_tahun', $tahun)
+        $daftarMapel = DataGuru::where('periode_tahun', $tahun)
             ->select('bidang_studi')
             ->distinct()
             ->orderBy('bidang_studi')

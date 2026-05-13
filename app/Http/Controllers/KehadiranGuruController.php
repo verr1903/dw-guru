@@ -67,6 +67,7 @@ class KehadiranGuruController extends Controller
             ? round((($totalHariKerja - $totalAbsen) / $totalHariKerja) * 100)
             : 0;
         $kehadiranRataRata = round((($totalHariKerja - $totalAbsen) / $totalHariKerja) * 100, 2);
+        
 
         // ===== CHART DATA: Tren Kehadiran per Bulan =====
         $trenKehadiran = DataAbsensiGuru::where('periode_tahun', $tahun)

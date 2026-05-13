@@ -6,6 +6,7 @@ use App\Http\Controllers\GuruController;
 use App\Http\Controllers\KehadiranGuruController;
 use App\Http\Controllers\JamMengajarController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PelatihanPrestasiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +26,7 @@ Route::get('/login', function () {
 Route::get('/jam-mengajar', [JamMengajarController::class, 'index'])->name('jam-mengajar');
 Route::get('/kehadiran-guru', [KehadiranGuruController::class, 'index'])->name('kehadiran-guru');
 Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
+Route::get('/pelatihan-prestasi', [PelatihanPrestasiController::class, 'index'])->name('pelatihan-prestasi');
 
 // ===== PENGATURAN =====
 Route::get('/pengaturan', function () {

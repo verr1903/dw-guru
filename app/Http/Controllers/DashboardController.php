@@ -23,12 +23,12 @@ class DashboardController extends Controller
 
         // Total jam mengajar tahun ini
         $totalJamMengajar = DataJamMengajarGuru::where('periode_tahun', $tahun)
-            ->selectRaw('SUM(x_1 + x_2 + x_3 + xi_1 + xi_2 + xi_3 + xii_1 + xii_2 + xii_3 + sd + smp + slb) as total')
+            ->selectRaw('SUM(x_1 + x_2 + x_3 + xi_1 + xi_2 + xi_3 + xii_1 + xii_2 + xii_3) as total')
             ->value('total') ?? 0;
 
         // Total jam tahun lalu (untuk perbandingan)
         $totalJamTahunLalu = DataJamMengajarGuru::where('periode_tahun', $tahun - 1)
-            ->selectRaw('SUM(x_1 + x_2 + x_3 + xi_1 + xi_2 + xi_3 + xii_1 + xii_2 + xii_3 + sd + smp + slb) as total')
+            ->selectRaw('SUM(x_1 + x_2 + x_3 + xi_1 + xi_2 + xi_3 + xii_1 + xii_2 + xii_3) as total')
             ->value('total') ?? 0;
 
         $persenPerubahanJam = $totalJamTahunLalu > 0
@@ -111,7 +111,7 @@ $trenJamPerBulan = collect($trenJamPerBulan)
 
         // Jam mengajar per guru per tahun (aggregate)
         $jamPerGuru = DataJamMengajarGuru::where('periode_tahun', $tahun)
-            ->selectRaw('nama_guru, bidang_studi, SUM(x_1 + x_2 + x_3 + xi_1 + xi_2 + xi_3 + xii_1 + xii_2 + xii_3 + sd + smp + slb) as total_jam')
+            ->selectRaw('nama_guru, bidang_studi, SUM(x_1 + x_2 + x_3 + xi_1 + xi_2 + xi_3 + xii_1 + xii_2 + xii_3) as total_jam')
             ->groupBy('nama_guru', 'bidang_studi')
             ->orderByDesc('total_jam')
             ->get();
@@ -140,8 +140,7 @@ $guruQuery = DB::table(DB::raw("(SELECT nama_guru, MAX(bidang_studi) as bidang_s
         DB::raw('COALESCE(SUM(
             j.x_1 + j.x_2 + j.x_3 +
             j.xi_1 + j.xi_2 + j.xi_3 +
-            j.xii_1 + j.xii_2 + j.xii_3 +
-            j.sd + j.smp + j.slb
+            j.xii_1 + j.xii_2 + j.xii_3
         ), 0) as jam_total')
     )
     ->leftJoin('data_jam_mengajar_guru as j', function ($join) use ($tahun) {

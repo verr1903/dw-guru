@@ -29,7 +29,7 @@
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Tingkat Kehadiran</p>
-            <p class="text-3xl font-bold text-emerald-500 mt-2">{{ $persenKehadiran }}%</p>
+            <p class="text-3xl font-bold text-emerald-500 mt-2">{{ number_format($kehadiranRataRata, 2) }}%</p>
             <div class="mt-2 w-full bg-gray-100 rounded-full h-1.5">
                 <div class="bg-emerald-500 h-1.5 rounded-full" style="width: {{ $persenKehadiran }}%"></div>
             </div>

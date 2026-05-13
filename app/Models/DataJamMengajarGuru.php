@@ -38,8 +38,7 @@ class DataJamMengajarGuru extends Model
     {
         return $this->x_1 + $this->x_2 + $this->x_3
              + $this->xi_1 + $this->xi_2 + $this->xi_3
-             + $this->xii_1 + $this->xii_2 + $this->xii_3
-             + $this->sd + $this->smp + $this->slb;
+             + $this->xii_1 + $this->xii_2 + $this->xii_3;
     }
 
     /**
