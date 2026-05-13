@@ -76,10 +76,11 @@ class PelatihanPrestasiController extends Controller
             ->orderBy('tingkat_kegiatan')
             ->pluck('tingkat_kegiatan');
 
-        $daftarTahun = DataPrestasiGuru::selectRaw('YEAR(tanggal_kegiatan) as tahun')
-            ->distinct()
-            ->orderByDesc('tahun')
-            ->pluck('tahun');
+        $daftarTahun = DataPrestasiGuru::whereNotNull('tanggal_kegiatan')
+    ->selectRaw('YEAR(tanggal_kegiatan) as tahun')
+    ->distinct()
+    ->orderByDesc('tahun')
+    ->pluck('tahun');
 
         $namaBulan = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret',
