@@ -1,5 +1,6 @@
 <x-app title="Jam Mengajar | SMA Cendana Pekanbaru">
 
+    {{-- ===== PAGE HEADER ===== --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Jam Mengajar</h1>
@@ -26,278 +27,621 @@
         </div>
     </div>
 
-    {{-- ===== CHARTS ROW ===== --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-6">
+    {{-- ===== ROW 1: DONUT + BAR ===== --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
 
-        {{-- Total Jam Mengajar (Line) --}}
+        {{-- Distribusi Jam Mengajar Per Guru (Donut) --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <div class="flex items-center justify-between mb-1">
-                <h2 class="text-sm font-semibold text-gray-800">Tren Jam per Tahun</h2>
-                <span class="text-xs text-gray-400 bg-gray-50 border border-gray-100 rounded-full px-2.5 py-0.5">All</span>
-            </div>
-            <p class="text-xs text-gray-400 mb-4">Total jam per tahun ajaran</p>
-            <div class="relative h-44">
-                <canvas id="lineChart"></canvas>
+            <h2 class="text-sm font-semibold text-gray-800 mb-0.5">Distribusi Jam Mengajar Per Guru</h2>
+            <p class="text-xs text-gray-400 mb-4">
+                Porsi jam mengajar setiap guru
+                @if($tahun) tahun {{ $tahun }} @endif
+                @if($guru) &mdash; {{ $guru }} @endif
+                @if($mapel) &mdash; {{ $mapel }} @endif
+            </p>
+            <div class="flex gap-4">
+                {{-- Canvas --}}
+                <div class="relative flex-shrink-0" style="width:220px; height:220px;">
+                    <canvas id="donutChart"></canvas>
+                    {{-- Center label --}}
+                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <span class="text-xs text-gray-400">Total</span>
+                        <span class="text-lg font-bold text-gray-800" id="donutTotal">—</span>
+                        <span class="text-xs text-gray-400">jam</span>
+                    </div>
+                </div>
+                {{-- Legend scrollable --}}
+                <div class="flex-1 overflow-y-auto max-h-52 space-y-1.5 pr-1" id="donutLegend"></div>
             </div>
         </div>
 
-        {{-- Distribusi per Guru (Donut) --}}
+        {{-- Beban Per Mata Pelajaran (Bar vertikal, warna-warni) --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <h2 class="text-sm font-semibold text-gray-800 mb-1">Top 5 Guru</h2>
-            <p class="text-xs text-gray-400 mb-3">Guru dengan jam mengajar terbanyak</p>
-            <div class="relative h-44 flex items-center justify-center">
-                <canvas id="donutChart"></canvas>
-            </div>
-        </div>
-
-        {{-- Beban per Mata Pelajaran (Bar) --}}
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <h2 class="text-sm font-semibold text-gray-800 mb-1">Jam per Bidang Studi</h2>
-            <p class="text-xs text-gray-400 mb-3">Total jam mengajar per mapel</p>
-            <div class="relative h-44">
+            <h2 class="text-sm font-semibold text-gray-800 mb-0.5">Beban Per Mata Pelajaran</h2>
+            <p class="text-xs text-gray-400 mb-4">
+                Total jam mengajar per mata pelajaran
+                @if($tahun) tahun {{ $tahun }} @endif
+            </p>
+            <div class="relative" style="height:220px;">
                 <canvas id="barChart"></canvas>
             </div>
         </div>
     </div>
 
-    {{-- ===== DETAIL TABLE ===== --}}
-    <div id="detail-jam" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    {{-- ===== ROW 2: LINE CHART + TABLE (side by side, like Power BI) ===== --}}
+    <div class="grid grid-cols-1 lg:grid-cols-1 gap-5 mb-5">
 
-        {{-- Table Header --}}
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 border-b border-gray-100">
-            <div>
-                <h2 class="text-base font-semibold text-gray-900">Detail Data Mengajar</h2>
-                <p class="text-xs text-gray-400 mt-0.5">Semua entri jam mengajar guru</p>
+        {{-- Line Chart --}}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-0.5">
+                <h2 class="text-sm font-semibold text-gray-800">Total Jam Mengajar Per Bulan</h2>
+                <div class="flex items-center gap-4 text-xs text-gray-500">
+                    <span class="flex items-center gap-1.5">
+                        <span class="inline-block w-5 h-0.5 bg-green-500 rounded"></span> Jam Mengajar
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                        <span class="inline-block w-5 h-0.5 bg-red-400 rounded"></span> Kehadiran
+                    </span>
+                </div>
             </div>
-            <div class="flex items-center gap-2">
+            <p class="text-xs text-gray-400 mb-4">Perbandingan jam mengajar dan kehadiran per bulan</p>
+            <div class="relative" style="height:240px;">
+                <canvas id="lineChart"></canvas>
+            </div>
+        </div>
+
+        {{-- Detail Table (scrollable, compact) --}}
+        <div id="detail-jam" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+
+            {{-- Table Header + Search --}}
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-gray-100">
+                <div>
+                    <h2 class="text-sm font-semibold text-gray-900">Detail Data Mengajar</h2>
+                    <p class="text-xs text-gray-400 mt-0.5">Rincian jam mengajar per guru per bulan</p>
+                </div>
                 <div class="relative">
-                    <input
-                        type="text"
-                        id="searchGuru"
-                        value="{{ $search }}"
+                    <input type="text" id="searchGuru" value="{{ $search }}"
                         placeholder="Cari nama guru..."
                         class="bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 w-44">
                     <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
-                <select id="filterMapel"
-                    class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 focus:outline-none">
-                    <option value="">Semua Mapel</option>
-                    @foreach($daftarMapel as $m)
-                    <option value="{{ strtolower($m) }}" {{ strtolower($mapel) == strtolower($m) ? 'selected' : '' }}>{{ $m }}</option>
-                    @endforeach
-                </select>
             </div>
-        </div>
 
-        {{-- Table --}}
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="bg-gray-50 border-b border-gray-100">
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama Guru</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Mata Pelajaran</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Jam</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kelas X</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kelas XI</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kelas XII</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Tahun</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    @forelse($jamMengajarData as $row)
-                   @php
-                        $kelasX   = $row->x_1 + $row->x_2 + $row->x_3;
-                        $kelasXI  = $row->xi_1 + $row->xi_2 + $row->xi_3;
-                        $kelasXII = $row->xii_1 + $row->xii_2 + $row->xii_3;
-                    @endphp
-                    <tr class="hover:bg-gray-50 transition-colors"
-                        data-nama="{{ strtolower($row->nama_guru) }}"
-                        data-mapel="{{ strtolower($row->bidang_studi) }}">
-                        <td class="px-6 py-3.5">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold shrink-0">
-                                    {{ strtoupper(substr($row->nama_guru, 0, 2)) }}
-                                </div>
-                                <span class="font-medium text-gray-800">{{ $row->nama_guru }}</span>
-                            </div>
-                        </td>
-                        <td class="px-6 py-3.5 text-gray-600">{{ $row->bidang_studi?: 'Tidak Diketahui' }}</td>
-                        <td class="px-6 py-3.5">
-                            <span class="font-semibold text-gray-800">{{ $row->total_jam }}</span>
-                            <span class="text-gray-400 text-xs"> jam</span>
-                        </td>
-                        <td class="px-6 py-3.5 text-gray-600">{{ $kelasX }} <span class="text-gray-400 text-xs"> jam</span></td>
-                        <td class="px-6 py-3.5 text-gray-600">{{ $kelasXI }} <span class="text-gray-400 text-xs"> jam</span></td>
-                        <td class="px-6 py-3.5 text-gray-600">{{ $kelasXII }} <span class="text-gray-400 text-xs"> jam</span></td>
-                        <td class="px-6 py-3.5 text-gray-600">{{ $row->periode_tahun }}</td>
-                    </tr>
-                    @empty
-                    <tr id="emptyRow">
-                        <td colspan="7" class="px-6 py-8 text-center text-gray-400">Tidak ada data jam mengajar.</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+            {{-- Scrollable Table --}}
+            <div class="">
+                <table class="w-full text-sm">
+                    <thead class="sticky top-0 z-10">
+                        {{-- thead --}}
+                        <tr class="bg-gray-50 border-b border-gray-100">
+                            <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama Guru</th>
+                            <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Total Jam</th>
+                            <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Detail</th>
+                            <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50" id="tableBody">
+                        {{-- tbody --}}
+                        @forelse($tableData as $row)
+                        @php
+                        $persen = $row->total_hari_mengajar > 0
+                        ? round(($row->jumlah_kehadiran / $row->total_hari_mengajar) * 100)
+                        : 0;
+                        $statusLabel = $persen >= 90 ? 'Memenuhi' : ($persen >= 75 ? 'Cukup' : 'Kurang');
+                        $statusColor = $persen >= 90 ? 'bg-green-100 text-green-700'
+                        : ($persen >= 75 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700');
+                        @endphp
+                        <tr class="hover:bg-gray-50 transition-colors" data-nama="{{ strtolower($row->nama_guru) }}">
+                            <td class="px-4 py-2.5 font-medium text-gray-800 text-xs">{{ $row->nama_guru }}</td>
+                            <td class="px-4 py-2.5 text-right text-xs font-semibold text-gray-800">{{ $row->jumlah_jam_mengajar }}</td>
+                            <td class="px-4 py-2.5 text-center">
+                                <button
+                                    onclick="bukaDetail({{ $row->id_guru }}, '{{ addslashes($row->nama_guru) }}', '{{ $tahun }}')"
+                                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    Lihat
+                                </button>
+                            </td>
+                            <td class="px-4 py-2.5 text-center">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium {{ $statusColor }}">
+                                    {{ $statusLabel }}
+                                </span>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-gray-400 text-sm">Tidak ada data.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
 
-        {{-- Pagination --}}
-        <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-            <p class="text-xs text-gray-500">
-                Menampilkan {{ $jamMengajarData->count() }} dari {{ $jamMengajarData->total() }} guru
-            </p>
-            <div class="flex items-center gap-1">
+            {{-- Pagination --}}
+            <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between bg-white">
+                <p class="text-xs text-gray-500">
+                    {{ $tableData->firstItem() }}–{{ $tableData->lastItem() }} dari {{ $tableData->total() }}
+                </p>
+                <div class="flex items-center gap-1">
+                    @if ($tableData->onFirstPage())
+                    <span class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 cursor-not-allowed">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </span>
+                    @else
+                    <a href="{{ $tableData->previousPageUrl() }}#detail-jam"
+                        class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </a>
+                    @endif
 
-                {{-- Previous --}}
-                @if ($jamMengajarData->onFirstPage())
-                <span class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 cursor-not-allowed">...</span>
-                @else
-                <a href="{{ $jamMengajarData->previousPageUrl() }}#detail-jam"
-                    class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100">...</a>
-                @endif
+                    @foreach($tableData->getUrlRange(max(1, $tableData->currentPage()-2), min($tableData->lastPage(), $tableData->currentPage()+2)) as $page => $url)
+                    <a href="{{ $url }}#detail-jam"
+                        class="w-7 h-7 flex items-center justify-center rounded-lg text-xs font-medium
+                            {{ $tableData->currentPage() == $page ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100' }}">
+                        {{ $page }}
+                    </a>
+                    @endforeach
 
-                {{-- Page Numbers --}}
-                @for ($i = 1; $i <= $jamMengajarData->lastPage(); $i++)
-                <a href="{{ $jamMengajarData->url($i) }}#detail-jam"
-                    class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium
-                    {{ $jamMengajarData->currentPage() == $i ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100' }}">
-                    {{ $i }}
-                </a>
-                @endfor
-
-                {{-- Next --}}
-                @if ($jamMengajarData->hasMorePages())
-                <a href="{{ $jamMengajarData->nextPageUrl() }}#detail-jam"
-                    class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100">...</a>
-                @else
-                <span class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 cursor-not-allowed">...</span>
-                @endif
-
+                    @if ($tableData->hasMorePages())
+                    <a href="{{ $tableData->nextPageUrl() }}#detail-jam"
+                        class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                    @else
+                    <span class="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 cursor-not-allowed">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </span>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
 
+    {{-- ===== MODAL DETAIL PER BULAN ===== --}}
+    <div id="modalDetail"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm hidden">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl mx-4 overflow-hidden">
+            {{-- Modal header --}}
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <div>
+                    <h3 class="text-sm font-bold text-gray-900" id="modalNamaGuru">—</h3>
+                    <p class="text-xs text-gray-400 mt-0.5">Detail jam mengajar per bulan</p>
+                </div>
+                <button onclick="tutupModal()"
+                    class="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            {{-- Modal body --}}
+            <div class="px-6 py-4 max-h-96 overflow-y-auto">
+                <div id="modalLoading" class="flex items-center justify-center py-10 text-gray-400 text-sm gap-2">
+                    <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                        <path class="opacity-75" fill="currentColor"
+                            d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                    Memuat data...
+                </div>
+                <table class="w-full text-sm hidden" id="modalTable">
+                    <thead>
+                        <tr class="border-b border-gray-100">
+                            <th class="pb-2 text-left text-xs font-semibold text-gray-500 uppercase">Bulan</th>
+                            <th class="pb-2 text-left text-xs font-semibold text-gray-500 uppercase">Mata Pelajaran</th>
+                            <th class="pb-2 text-right text-xs font-semibold text-gray-500 uppercase">Jam</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalBody" class="divide-y divide-gray-50"></tbody>
+                    <tfoot>
+                        <tr class="border-t border-gray-200 bg-gray-50">
+                            <td colspan="2" class="py-2 px-0 text-xs font-bold text-gray-700">Total</td>
+                            <td class="py-2 text-right text-xs font-bold text-gray-800" id="modalTotalJam">—</td>
+                            
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
 
     @push('scripts')
     <script>
-        
+        // ── Fungsi modal — HARUS global (di luar DOMContentLoaded) ──────
+        const DETAIL_URL = "{{ route('jam-mengajar.detail-guru') }}";
+        const NAMA_BULAN = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+        function bukaDetail(idGuru, namaGuru, tahun) {
+            document.getElementById('modalNamaGuru').textContent = namaGuru;
+            document.getElementById('modalLoading').classList.remove('hidden');
+            document.getElementById('modalTable').classList.add('hidden');
+            document.getElementById('modalDetail').classList.remove('hidden');
+
+            const params = new URLSearchParams({
+                id_guru: idGuru
+            });
+            if (tahun) params.append('tahun', tahun);
+
+            fetch(`${DETAIL_URL}?${params}`)
+                .then(r => r.json())
+                .then(rows => {
+                    const tbody = document.getElementById('modalBody');
+                    tbody.innerHTML = '';
+                    let totalJam = 0,
+                        totalHadir = 0;
+
+                    rows.forEach(row => {
+                        const persen = row.jumlah_jam_mengajar > 0
+    ? Math.round((row.jumlah_kehadiran / row.jumlah_jam_mengajar) * 100)
+    : 0;
+                        const color = persen >= 90 ? 'text-green-600' : persen >= 75 ? 'text-yellow-600' : 'text-red-500';
+                        totalJam += row.jumlah_jam_mengajar;
+
+                        tbody.insertAdjacentHTML('beforeend', `
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-2 text-xs text-gray-600">${NAMA_BULAN[row.bulan]} ${row.tahun}</td>
+                            <td class="py-2 text-xs text-gray-600">${row.nama_mata_pelajaran}</td>
+                            <td class="py-2 text-right text-xs font-semibold text-gray-800">${row.jumlah_jam_mengajar}</td>
+                        </tr>
+                    `);
+                    });
+
+                    document.getElementById('modalTotalJam').textContent = totalJam;
+                    document.getElementById('modalLoading').classList.add('hidden');
+                    document.getElementById('modalTable').classList.remove('hidden');
+                })
+                .catch(() => {
+                    document.getElementById('modalLoading').textContent = 'Gagal memuat data.';
+                });
+        }
+
+        function tutupModal() {
+            document.getElementById('modalDetail').classList.add('hidden');
+        }
+
+        // Klik backdrop untuk menutup modal
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('modalDetail').addEventListener('click', function(e) {
+                if (e.target === this) tutupModal();
+            });
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
 
-    // ---- Line Chart ----
-    try {
-        const lineCtx = document.getElementById('lineChart').getContext('2d');
-        const gradient = lineCtx.createLinearGradient(0, 0, 0, 180);
-        gradient.addColorStop(0, 'rgba(99,102,241,0.2)');
-        gradient.addColorStop(1, 'rgba(99,102,241,0)');
-        const trenData = @json($trenPerTahun);
-        new Chart(lineCtx, {
-            type: 'line',
-            data: {
-                labels: trenData.map(t => t.periode_tahun.toString()),
-                datasets: [{
-                    data: trenData.map(t => parseInt(t.total_jam)),
-                    borderColor: '#6366f1', borderWidth: 2,
-                    backgroundColor: gradient, fill: true, tension: 0.4,
-                    pointBackgroundColor: '#6366f1', pointBorderColor: '#fff',
-                    pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6,
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', bodyColor: '#fff', padding: 8, callbacks: { label: ctx => ` ${ctx.parsed.y} jam` } } },
-                scales: {
-                    x: { grid: { display: false }, border: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-                    y: { grid: { color: '#f1f5f9' }, border: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } }, min: 0 }
-                }
+            // ── Warna palette ───────────────────────────────────────────
+            const PALETTE = [
+                '#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f',
+                '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac',
+                '#d4a6c8', '#8cd17d', '#86bcb6', '#f1ce63', '#a0cbe8',
+                '#ffbe7d', '#fabfd2', '#b6992d', '#499894', '#e05c68',
+            ];
+
+            // ── DATA dari Blade ─────────────────────────────────────────────
+            const distribusiGuru = @json($distribusiPerGuru);
+            const bebanMapel = @json($bebanPerMapel);
+            const trenBulan = @json($trenPerBulan);
+
+            // ============================================================
+            // CHART 1 — Donut: Distribusi Per Guru
+            // ============================================================
+            (function() {
+                if (!distribusiGuru.length) return;
+
+                const ctx = document.getElementById('donutChart').getContext('2d');
+                const labels = distribusiGuru.map(g => g.nama_guru);
+                const data = distribusiGuru.map(g => g.total_jam);
+                const persentase = distribusiGuru.map(g => g.persentase);
+                const total = data.reduce((a, b) => a + b, 0);
+
+                document.getElementById('donutTotal').textContent = total.toLocaleString('id-ID');
+
+                // Custom legend: nama + jam + persen (matches Power BI)
+                const legendEl = document.getElementById('donutLegend');
+                labels.forEach((label, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center gap-2 text-xs text-gray-700';
+                    div.innerHTML = `
+                    <span class="inline-block w-3 h-3 rounded-sm flex-shrink-0" style="background:${PALETTE[i % PALETTE.length]}"></span>
+                    <span class="flex-1 truncate" title="${label}">${label}</span>
+                    <span class="text-gray-500 tabular-nums">${data[i].toLocaleString('id-ID')}</span>
+                    <span class="font-semibold text-gray-700 tabular-nums w-8 text-right">(${persentase[i]}%)</span>
+                `;
+                    legendEl.appendChild(div);
+                });
+
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels,
+                        datasets: [{
+                            data,
+                            backgroundColor: labels.map((_, i) => PALETTE[i % PALETTE.length]),
+                            borderWidth: 1.5,
+                            borderColor: '#fff',
+                            hoverOffset: 8,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '55%',
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: '#1e293b',
+                                padding: 10,
+                                callbacks: {
+                                    label: ctx => {
+                                        const pct = persentase[ctx.dataIndex];
+                                        return ` ${ctx.label}: ${ctx.parsed.toLocaleString('id-ID')} jam (${pct}%)`;
+                                    }
+                                }
+                            },
+                            // Show jam value on each segment (like Power BI)
+                            datalabels: false,
+                        }
+                    },
+                    plugins: [{
+                        // Draw jam value on each arc segment
+                        id: 'arcLabels',
+                        afterDatasetsDraw(chart) {
+                            const {
+                                ctx,
+                                data
+                            } = chart;
+                            const meta = chart.getDatasetMeta(0);
+                            meta.data.forEach((arc, i) => {
+                                const val = data.datasets[0].data[i];
+                                if (!val) return;
+                                const angle = (arc.startAngle + arc.endAngle) / 2;
+                                const r = (arc.outerRadius + arc.innerRadius) / 2;
+                                const x = arc.x + Math.cos(angle) * r;
+                                const y = arc.y + Math.sin(angle) * r;
+                                ctx.save();
+                                ctx.font = 'bold 9px system-ui';
+                                ctx.fillStyle = '#fff';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                // Only draw if arc is wide enough
+                                const sweep = arc.endAngle - arc.startAngle;
+                                if (sweep > 0.25) {
+                                    ctx.fillText(val.toLocaleString('id-ID'), x, y);
+                                }
+                                ctx.restore();
+                            });
+                        }
+                    }]
+                });
+            })();
+
+            // ============================================================
+            // CHART 2 — Bar: Beban Per Mata Pelajaran (warna-warni)
+            // ============================================================
+            (function() {
+                if (!bebanMapel.length) return;
+
+                const ctx = document.getElementById('barChart').getContext('2d');
+                const labels = bebanMapel.map(m => {
+                    const l = m.nama_mata_pelajaran || 'Tidak Diketahui';
+                    return l.length > 14 ? l.substring(0, 14) + '…' : l;
+                });
+                const data = bebanMapel.map(m => m.total_jam);
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            data,
+                            backgroundColor: labels.map((_, i) => PALETTE[i % PALETTE.length]),
+                            borderRadius: 3,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: '#1e293b',
+                                padding: 10,
+                                callbacks: {
+                                    title: items => bebanMapel[items[0].dataIndex]?.nama_mata_pelajaran ?? '',
+                                    label: ctx => ` ${ctx.parsed.y.toLocaleString('id-ID')} jam`,
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                border: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    font: {
+                                        size: 8
+                                    },
+                                    maxRotation: 45
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: '#f1f5f9'
+                                },
+                                border: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    font: {
+                                        size: 10
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Jumlah Jam Mengajar',
+                                    color: '#94a3b8',
+                                    font: {
+                                        size: 10
+                                    }
+                                },
+                                min: 0,
+                            }
+                        }
+                    }
+                });
+            })();
+
+            // ============================================================
+            // CHART 3 — Line: Tren Per Bulan (2 garis — mirip Power BI)
+            // ============================================================
+            (function() {
+                if (!trenBulan.length) return;
+
+                const ctx = document.getElementById('lineChart').getContext('2d');
+                const labels = trenBulan.map(t => t.nama_bulan);
+                const jamData = trenBulan.map(t => t.total_jam);
+                const hadirData = trenBulan.map(t => t.total_kehadiran);
+
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                                label: 'Jumlah Jam Mengajar',
+                                data: jamData,
+                                borderColor: '#22c55e',
+                                backgroundColor: 'rgba(34,197,94,0.08)',
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.3,
+                                pointBackgroundColor: '#22c55e',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
+                            },
+                            {
+                                label: 'Jumlah Kehadiran',
+                                data: hadirData,
+                                borderColor: '#f87171',
+                                backgroundColor: 'rgba(248,113,113,0.08)',
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.3,
+                                pointBackgroundColor: '#f87171',
+                                pointBorderColor: '#fff',
+                                pointBorderWidth: 2,
+                                pointRadius: 4,
+                                pointHoverRadius: 6,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: '#1e293b',
+                                padding: 10,
+                                callbacks: {
+                                    label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString('id-ID')}`
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                border: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    font: {
+                                        size: 10
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Bulan',
+                                    color: '#94a3b8',
+                                    font: {
+                                        size: 10
+                                    }
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: '#f1f5f9'
+                                },
+                                border: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    font: {
+                                        size: 10
+                                    }
+                                },
+                                min: 0,
+                            }
+                        }
+                    }
+                });
+            })();
+
+            // ============================================================
+            // Realtime client-side search pada tabel
+            // ============================================================
+            const searchInput = document.getElementById('searchGuru');
+            const tableRows = document.querySelectorAll('#tableBody tr[data-nama]');
+            const emptyRow = document.getElementById('emptyRow');
+
+            function filterTable() {
+                const keyword = searchInput ? searchInput.value.toLowerCase().trim() : '';
+                let visibleCount = 0;
+                tableRows.forEach(row => {
+                    const show = row.dataset.nama.includes(keyword);
+                    row.style.display = show ? '' : 'none';
+                    if (show) visibleCount++;
+                });
+                if (emptyRow) emptyRow.style.display = visibleCount === 0 ? '' : 'none';
             }
+
+            if (searchInput) searchInput.addEventListener('input', filterTable);
         });
-    } catch(e) { console.error('Line chart error:', e); }
-
-    // ---- Donut Chart ----
-    try {
-        const donutCtx = document.getElementById('donutChart').getContext('2d');
-        const topGuru = @json($jamPerGuru->take(5));
-        new Chart(donutCtx, {
-            type: 'doughnut',
-            data: {
-                labels: topGuru.map(g => g.nama_guru),
-                datasets: [{
-                    data: topGuru.map(g => parseInt(g.total_jam)),
-                    backgroundColor: ['#6366f1', '#34d399', '#fbbf24', '#60a5fa', '#e5e7eb'],
-                    borderWidth: 2, borderColor: '#fff', hoverOffset: 5,
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false, cutout: '62%',
-                plugins: {
-                    legend: { position: 'right', labels: { boxWidth: 10, boxHeight: 10, borderRadius: 3, font: { size: 10 }, color: '#6b7280', padding: 8 } },
-                    tooltip: { backgroundColor: '#1e293b', bodyColor: '#fff', padding: 8, callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed} jam` } }
-                }
-            }
-        });
-    } catch(e) { console.error('Donut chart error:', e); }
-
-    // ---- Bar Chart ----
-    try {
-        const barCtx = document.getElementById('barChart').getContext('2d');
-        const mapelData = @json($jamPerMapel->take(8));
-        new Chart(barCtx, {
-            type: 'bar',
-            data: {
-                labels: mapelData.map(m => {
-                    const label = m.bidang_studi || 'Tidak Diketahui';
-                    return label.length > 10 ? label.substring(0, 10) + '...' : label;
-                }),
-                datasets: [{
-                    data: mapelData.map(m => parseInt(m.total_jam)),
-                    backgroundColor: '#6366f1',
-                    borderRadius: 5, borderSkipped: false, hoverBackgroundColor: '#4f46e5',
-                }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1e293b', bodyColor: '#fff', padding: 8, callbacks: { label: ctx => ` ${ctx.parsed.y} jam` } } },
-                scales: {
-                    x: { grid: { display: false }, border: { display: false }, ticks: { color: '#94a3b8', font: { size: 9 } } },
-                    y: { grid: { color: '#f1f5f9' }, border: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } }, min: 0 }
-                }
-            }
-        });
-    } catch(e) { console.error('Bar chart error:', e); }
-
-    // ---- Realtime Search ----
-    const searchInput = document.getElementById('searchGuru');
-    const mapelSelect = document.getElementById('filterMapel');
-    const tableRows   = document.querySelectorAll('tbody tr[data-nama]');
-    const emptyRow    = document.getElementById('emptyRow');
-
-    function filterTable() {
-        const keyword = searchInput.value.toLowerCase().trim();
-        const mapel   = mapelSelect.value.toLowerCase().trim();
-        let visibleCount = 0;
-
-        tableRows.forEach(row => {
-            const nama     = row.dataset.nama.toLowerCase();
-            const mapelRow = row.dataset.mapel.toLowerCase();
-            const matchNama  = nama.includes(keyword);
-            const matchMapel = mapel === '' || mapelRow === mapel;
-
-            if (matchNama && matchMapel) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        if (emptyRow) emptyRow.style.display = visibleCount === 0 ? '' : 'none';
-    }
-
-    if (searchInput) searchInput.addEventListener('input', filterTable);
-    if (mapelSelect) mapelSelect.addEventListener('change', filterTable);
-
-});
     </script>
     @endpush
 

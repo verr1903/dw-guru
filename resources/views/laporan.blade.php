@@ -1,312 +1,427 @@
-<x-app title="Laporan | SMA Cendana Pekanbaru">
-    
+{{-- resources/views/laporan.blade.php --}}
+<x-app title="Unduh Laporan | SMA Cendana Pekanbaru">
+
+    {{-- ── Page Header ────────────────────────────────────────────────── --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Laporan Kinerja Guru</h1>
-            <p class="text-sm text-gray-500 mt-1">Ringkasan performa mengajar dan kehadiran tenaga pengajar</p>
+            <h1 class="text-2xl font-bold text-gray-900">Unduh Laporan</h1>
+            <p class="text-sm text-gray-500 mt-1">Ekspor data kinerja guru ke PDF atau Excel</p>
         </div>
         <form method="GET" action="{{ route('laporan') }}">
             <div class="relative">
                 <select name="tahun" onchange="this.form.submit()"
                     class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2.5 pr-9 text-sm font-medium text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer">
                     @foreach($daftarTahun as $t)
-                        <option value="{{ $t }}" {{ $tahun == $t ? 'selected' : '' }}>Tahun {{ $t }}</option>
+                    <option value="{{ $t }}" {{ $tahun == $t ? 'selected' : '' }}>Tahun {{ $t }}</option>
                     @endforeach
                 </select>
                 <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
                 </div>
             </div>
         </form>
     </div>
 
-    {{-- ===== STAT CARDS ===== --}}
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+    {{-- ── Flash Success ───────────────────────────────────────────────── --}}
+    @if(session('success'))
+    <div class="mb-6 flex items-center gap-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl px-5 py-3.5 text-sm font-medium">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        {{ session('success') }}
+    </div>
+    @endif
+
+    {{-- ── Stat Cards ─────────────────────────────────────────────────── --}}
+    <div class="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Total Jam Mengajar</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($totalJamTahun) }}</p>
-            <p class="text-xs text-gray-400 font-medium mt-1">Jam tahun {{ $tahun }}</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($totalJamMengajar) }}</p>
+            <p class="text-xs text-gray-400 mt-1">jam · tahun {{ $tahun }}</p>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Tingkat Kehadiran</p>
-            <p class="text-3xl font-bold text-emerald-500 mt-2">{{ number_format($kehadiranRataRata, 2) }}%</p>
+            <p class="text-3xl font-bold text-emerald-500 mt-2">{{ $kehadiranRataRata }}<span class="text-lg font-semibold text-emerald-300">%</span></p>
             <div class="mt-2 w-full bg-gray-100 rounded-full h-1.5">
-                <div class="bg-emerald-500 h-1.5 rounded-full" style="width: {{ $persenKehadiran }}%"></div>
+                <div class="bg-emerald-500 h-1.5 rounded-full transition-all" style="width: {{ min($kehadiranRataRata, 100) }}%"></div>
             </div>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Guru Aktif</p>
+            <p class="text-3xl font-bold text-gray-900 mt-2">{{ $totalGuru }}</p>
+            <p class="text-xs text-gray-400 mt-1">pengajar aktif</p>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Total Prestasi</p>
-            <p class="text-3xl font-bold text-gray-900 mt-2">{{ $totalPrestasi }}</p>
-            <p class="text-xs text-emerald-600 font-medium mt-1">Seluruh periode</p>
-        </div>
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Total Pelatihan</p>
-            <p class="text-3xl font-bold text-amber-500 mt-2">{{ $totalPelatihan }}</p>
-            <p class="text-xs text-gray-400 font-medium mt-1">Kegiatan tercatat</p>
+            <p class="text-3xl font-bold text-amber-500 mt-2">{{ $totalPrestasi }}</p>
+            <p class="text-xs text-gray-400 mt-1">pencapaian tercatat</p>
         </div>
     </div>
 
-    {{-- ===== DOWNLOAD LAPORAN ===== --}}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+    {{-- ── Download Cards ──────────────────────────────────────────────── --}}
+    <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-4">Pilih Laporan</h2>
 
-        {{-- Jam Mengajar --}}
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
-            <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </div>
-            <div>
-                <p class="text-sm font-semibold text-gray-800">Jam Mengajar</p>
-                <p class="text-xs text-gray-400 mt-0.5">Rekap total jam per guru</p>
-            </div>
-            <div class="flex items-center gap-2 mt-auto">
-                <a href=""
-                    class="flex-1 flex items-center justify-center gap-1.5 bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold py-2 rounded-xl transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    PDF
-                </a>
-                <a href=""
-                    class="flex-1 flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold py-2 rounded-xl transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Excel
-                </a>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+
+        {{-- ── Laporan 1: Rekap Kinerja (Dashboard) ── --}}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+            {{-- Header strip --}}
+            <div class="h-1.5 bg-gradient-to-r from-gray-700 to-gray-500"></div>
+            <div class="p-6 flex flex-col flex-1 gap-4">
+                <div class="flex items-start gap-4">
+                    <div class="w-11 h-11 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-900 text-sm">Rekap Kinerja Guru</p>
+                        <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">Total jam, kehadiran, dan ringkasan kinerja seluruh guru tahun {{ $tahun }}</p>
+                    </div>
+                </div>
+
+                {{-- Preview mini --}}
+                <div class="bg-gray-50 rounded-xl p-3 flex-1">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2.5">Preview — Top 5 Jam</p>
+                    <div class="space-y-1.5">
+                        @foreach($previewJam as $guru)
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-xs text-gray-700 truncate">{{ $guru->nama_guru }}</span>
+                            <span class="text-xs font-semibold text-gray-900 shrink-0">{{ number_format($guru->total_jam) }} jam</span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                {{-- Download buttons --}}
+                <div class="flex gap-2">
+                    <a href="{{ route('laporan.export.dashboard.pdf', ['tahun' => $tahun]) }}"
+                        class="flex-1 flex items-center justify-center gap-1.5 bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold py-2.5 rounded-xl transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        PDF
+                    </a>
+                    <a href="{{ route('laporan.export.dashboard.excel', ['tahun' => $tahun]) }}"
+                        class="flex-1 flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold py-2.5 rounded-xl transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Excel
+                    </a>
+                </div>
             </div>
         </div>
 
-        {{-- Kehadiran Guru --}}
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
-            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-            </div>
-            <div>
-                <p class="text-sm font-semibold text-gray-800">Kehadiran Guru</p>
-                <p class="text-xs text-gray-400 mt-0.5">Data hadir, izin & alpa</p>
-            </div>
-            <div class="flex items-center gap-2 mt-auto">
-                <a href=""
-                    class="flex-1 flex items-center justify-center gap-1.5 bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold py-2 rounded-xl transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    PDF
-                </a>
-                <a href=""
-                    class="flex-1 flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold py-2 rounded-xl transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Excel
-                </a>
+        {{-- ── Laporan 2: Jam Mengajar ── --}}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+            <div class="h-1.5 bg-gradient-to-r from-emerald-500 to-teal-400"></div>
+            <div class="p-6 flex flex-col flex-1 gap-4">
+                <div class="flex items-start gap-4">
+                    <div class="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-900 text-sm">Jam Mengajar</p>
+                        <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">Detail beban jam mengajar per guru dan per mata pelajaran tahun {{ $tahun }}</p>
+                    </div>
+                </div>
+
+                {{-- Preview: bar chart sederhana --}}
+                <div class="bg-gray-50 rounded-xl p-3 flex-1">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Preview — Distribusi Jam</p>
+                    @php $maxJam = $previewJam->max('total_jam') ?: 1; @endphp
+                    <div class="space-y-2">
+                        @foreach($previewJam as $guru)
+                        <div>
+                            <div class="flex justify-between mb-0.5">
+                                <span class="text-xs text-gray-600 truncate pr-2">{{ Str::limit($guru->nama_guru, 20) }}</span>
+                                <span class="text-xs font-semibold text-emerald-600 shrink-0">{{ number_format($guru->total_jam) }}</span>
+                            </div>
+                            <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full bg-emerald-500 rounded-full" style="width: {{ round(($guru->total_jam / $maxJam) * 100) }}%"></div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <a href="{{ route('laporan.export.jam.pdf', ['tahun' => $tahun]) }}"
+                        class="flex-1 flex items-center justify-center gap-1.5 bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold py-2.5 rounded-xl transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        PDF
+                    </a>
+                    <a href="{{ route('laporan.export.jam.excel', ['tahun' => $tahun]) }}"
+                        class="flex-1 flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold py-2.5 rounded-xl transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Excel
+                    </a>
+                </div>
             </div>
         </div>
 
-        {{-- Pelatihan --}}
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                </svg>
-            </div>
-            <div>
-                <p class="text-sm font-semibold text-gray-800">Pelatihan</p>
-                <p class="text-xs text-gray-400 mt-0.5">Riwayat kegiatan pelatihan</p>
-            </div>
-            <div class="flex items-center gap-2 mt-auto">
-                <a href=""
-                    class="flex-1 flex items-center justify-center gap-1.5 bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold py-2 rounded-xl transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    PDF
-                </a>
-                <a href=""
-                    class="flex-1 flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold py-2 rounded-xl transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Excel
-                </a>
-            </div>
-        </div>
+        {{-- ── Laporan 3: Kehadiran Guru ── --}}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col">
+            <div class="h-1.5 bg-gradient-to-r from-blue-500 to-indigo-400"></div>
+            <div class="p-6 flex flex-col flex-1 gap-4">
+                <div class="flex items-start gap-4">
+                    <div class="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-900 text-sm">Kehadiran Guru</p>
+                        <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">Data hadir, izin & alpa seluruh guru per bulan tahun {{ $tahun }}</p>
+                    </div>
+                </div>
 
-        {{-- Prestasi --}}
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3">
-            <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                </svg>
-            </div>
-            <div>
-                <p class="text-sm font-semibold text-gray-800">Prestasi</p>
-                <p class="text-xs text-gray-400 mt-0.5">Pencapaian & penghargaan</p>
-            </div>
-            <div class="flex items-center gap-2 mt-auto">
-                <a href=""
-                    class="flex-1 flex items-center justify-center gap-1.5 bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold py-2 rounded-xl transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    PDF
-                </a>
-                <a href=""
-                    class="flex-1 flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold py-2 rounded-xl transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Excel
-                </a>
+                {{-- Preview: persentase kehadiran --}}
+                <div class="bg-gray-50 rounded-xl p-3 flex-1">
+                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2.5">Preview — % Kehadiran</p>
+                    <div class="space-y-2">
+                        @foreach($previewKehadiran as $guru)
+                        <div>
+                            <div class="flex justify-between mb-0.5">
+                                <span class="text-xs text-gray-600 truncate pr-2">{{ Str::limit($guru->nama_guru, 20) }}</span>
+                                <span class="text-xs font-semibold {{ $guru->persen_kehadiran >= 90 ? 'text-emerald-600' : ($guru->persen_kehadiran >= 75 ? 'text-amber-500' : 'text-red-500') }} shrink-0">
+                                    {{ $guru->persen_kehadiran }}%
+                                </span>
+                            </div>
+                            <div class="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full rounded-full {{ $guru->persen_kehadiran >= 90 ? 'bg-emerald-500' : ($guru->persen_kehadiran >= 75 ? 'bg-amber-400' : 'bg-red-400') }}"
+                                    style="width: {{ min($guru->persen_kehadiran, 100) }}%"></div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <a href="{{ route('laporan.export.kehadiran.pdf', ['tahun' => $tahun]) }}"
+                        class="flex-1 flex items-center justify-center gap-1.5 bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold py-2.5 rounded-xl transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        PDF
+                    </a>
+                    <a href="{{ route('laporan.export.kehadiran.excel', ['tahun' => $tahun]) }}"
+                        class="flex-1 flex items-center justify-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold py-2.5 rounded-xl transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Excel
+                    </a>
+                </div>
             </div>
         </div>
 
     </div>
 
-    {{-- ===== CHARTS ===== --}}
-    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
+    {{-- ── Tren Bulanan (mini chart + tabel) ─────────────────────────── --}}
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+        {{-- Chart --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 lg:col-span-3">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between mb-5">
                 <div>
-                    <h2 class="text-base font-semibold text-gray-900">Tren Absensi per Bulan</h2>
-                    <p class="text-xs text-gray-400 mt-0.5">Sakit, Izin, Alpa per bulan</p>
+                    <h2 class="text-base font-semibold text-gray-900">Tren Bulanan {{ $tahun }}</h2>
+                    <p class="text-xs text-gray-400 mt-0.5">Jam mengajar & kehadiran per bulan</p>
                 </div>
-                <div class="flex items-center gap-3 text-xs text-gray-500">
-                    <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-indigo-500 inline-block rounded"></span> Sakit</span>
-                    <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-amber-400 inline-block rounded"></span> Izin</span>
-                    <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-red-400 inline-block rounded"></span> Alpa</span>
+                <div class="flex items-center gap-4 text-xs text-gray-500">
+                    <span class="flex items-center gap-1.5">
+                        <span class="w-3 h-0.5 bg-gray-800 inline-block rounded"></span> Jam
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                        <span class="w-3 h-0.5 bg-emerald-500 inline-block rounded"></span> Hadir
+                    </span>
                 </div>
             </div>
-            <div class="relative h-56"><canvas id="lineChart"></canvas></div>
+            <div class="relative h-52">
+                <canvas id="trenChart"></canvas>
+            </div>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 lg:col-span-2">
-            <div class="mb-4">
-                <h2 class="text-base font-semibold text-gray-900">Distribusi Absensi</h2>
+
+        {{-- Tabel ringkasan bulanan --}}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden lg:col-span-2">
+            <div class="px-5 py-4 border-b border-gray-100">
+                <h2 class="text-base font-semibold text-gray-900">Ringkasan per Bulan</h2>
                 <p class="text-xs text-gray-400 mt-0.5">Tahun {{ $tahun }}</p>
             </div>
-            <div class="relative h-44 flex items-center justify-center"><canvas id="pieChart"></canvas></div>
-            @php
-                $totalSakit = $trenKehadiran->sum('total_sakit');
-                $totalIzin = $trenKehadiran->sum('total_izin');
-                $totalAlpa = $trenKehadiran->sum('total_alpa');
-            @endphp
-            <div class="grid grid-cols-3 gap-2 mt-5">
-                <div class="flex flex-col items-center gap-1"><span class="w-3 h-3 rounded-full bg-blue-500"></span><span class="text-xs text-gray-500">Sakit</span><span class="text-sm font-bold text-gray-800">{{ $totalSakit }}</span></div>
-                <div class="flex flex-col items-center gap-1"><span class="w-3 h-3 rounded-full bg-amber-400"></span><span class="text-xs text-gray-500">Izin</span><span class="text-sm font-bold text-gray-800">{{ $totalIzin }}</span></div>
-                <div class="flex flex-col items-center gap-1"><span class="w-3 h-3 rounded-full bg-red-400"></span><span class="text-xs text-gray-500">Alpa</span><span class="text-sm font-bold text-gray-800">{{ $totalAlpa }}</span></div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                    <thead>
+                        <tr class="bg-gray-50">
+                            <th class="px-4 py-2.5 text-left font-semibold text-gray-400 uppercase tracking-wider">Bln</th>
+                            <th class="px-4 py-2.5 text-right font-semibold text-gray-400 uppercase tracking-wider">Jam</th>
+                            <th class="px-4 py-2.5 text-right font-semibold text-gray-400 uppercase tracking-wider">Hadir</th>
+                            <th class="px-4 py-2.5 text-right font-semibold text-gray-400 uppercase tracking-wider">Izin</th>
+                            <th class="px-4 py-2.5 text-right font-semibold text-gray-400 uppercase tracking-wider">Alpa</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        @forelse($trenBulan as $row)
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-4 py-2.5 font-medium text-gray-700">{{ $namaBulan[$row->bulan] ?? $row->bulan }}</td>
+                            <td class="px-4 py-2.5 text-right text-gray-700">{{ number_format($row->total_jam) }}</td>
+                            <td class="px-4 py-2.5 text-right text-emerald-600 font-medium">{{ number_format($row->total_hadir) }}</td>
+                            <td class="px-4 py-2.5 text-right text-amber-500">{{ number_format($row->total_izin) }}</td>
+                            <td class="px-4 py-2.5 text-right text-red-400">{{ number_format($row->total_alpha) }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="px-4 py-6 text-center text-gray-400">Tidak ada data.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                    @if($trenBulan->isNotEmpty())
+                    <tfoot>
+                        <tr class="bg-gray-50 font-semibold">
+                            <td class="px-4 py-2.5 text-gray-700">Total</td>
+                            <td class="px-4 py-2.5 text-right text-gray-900">{{ number_format($trenBulan->sum('total_jam')) }}</td>
+                            <td class="px-4 py-2.5 text-right text-emerald-600">{{ number_format($trenBulan->sum('total_hadir')) }}</td>
+                            <td class="px-4 py-2.5 text-right text-amber-500">{{ number_format($trenBulan->sum('total_izin')) }}</td>
+                            <td class="px-4 py-2.5 text-right text-red-400">{{ number_format($trenBulan->sum('total_alpha')) }}</td>
+                        </tr>
+                    </tfoot>
+                    @endif
+                </table>
             </div>
         </div>
-    </div>
 
-    {{-- ===== TABLE ===== --}}
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 border-b border-gray-100">
-            <h2 class="text-base font-semibold text-gray-900">Detail Kinerja Guru</h2>
-            <form method="GET" action="{{ route('laporan') }}" class="flex items-center gap-3">
-                <input type="hidden" name="tahun" value="{{ $tahun }}">
-                <div class="relative">
-                    <input type="text" name="search" value="{{ $search }}" placeholder="Cari guru..."
-                        class="bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 w-44">
-                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                </div>
-                <button type="submit" class="bg-gray-900 hover:bg-gray-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all">Cari</button>
-            </form>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead>
-                    <tr class="bg-gray-50 text-left">
-                        <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Nama Guru</th>
-                        <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Jam Mengajar</th>
-                        <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Kehadiran</th>
-                        <th class="px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Prestasi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    @forelse($guruKinerja as $guru)
-                    @php
-                        $absen = $absensiPerGuru[$guru->nama_guru] ?? null;
-                        $totalAbsen = $absen ? $absen->total_absen : 0;
-                        $jmlPrestasi = $prestasiPerGuru[$guru->nama_guru] ?? 0;
-                    @endphp
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-6 py-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold shrink-0">{{ strtoupper(substr($guru->nama_guru, 0, 2)) }}</div>
-                                <div><p class="font-semibold text-gray-800">{{ $guru->nama_guru }}</p><p class="text-xs text-gray-400">{{ $guru->bidang_studi }}</p></div>
-                            </div>
-                        </td>
-                        <td class="px-6 py-4 font-medium text-gray-700">{{ $guru->total_jam }} jam</td>
-                        <td class="px-6 py-4">
-                            @if($totalAbsen == 0)
-                            <span class="text-emerald-600 font-semibold text-xs">Hadir Penuh</span>
-                            @else
-                            <span class="text-amber-600 font-semibold text-xs">{{ $totalAbsen }} hari absen</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4">
-                            @if($jmlPrestasi > 0)
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">{{ $jmlPrestasi }} prestasi</span>
-                            @else
-                            <span class="text-gray-400">—</span>
-                            @endif
-                        </td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="4" class="px-6 py-8 text-center text-gray-400">Tidak ada data.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="px-6 py-4 border-t border-gray-100">
-            {{ $guruKinerja->appends(['tahun' => $tahun, 'search' => $search])->links() }}
-        </div>
     </div>
 
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const trenData = @json($trenKehadiran);
-            const bulanNames = @json($namaBulan);
-            const labels = trenData.map(t => bulanNames[t.periode_bulan] ? bulanNames[t.periode_bulan].substring(0,3) : t.periode_bulan);
+            const tren = @json($trenBulan);
+            const bNames = @json($namaBulan);
+            const labels = tren.map(t => bNames[t.bulan] ?? t.bulan);
 
-            // Line Chart
-            const lineCtx = document.getElementById('lineChart').getContext('2d');
-            const g = lineCtx.createLinearGradient(0,0,0,220);
-            g.addColorStop(0,'rgba(99,102,241,0.2)'); g.addColorStop(1,'rgba(99,102,241,0)');
-            new Chart(lineCtx, {
+            const ctx = document.getElementById('trenChart').getContext('2d');
+
+            const gradJam = ctx.createLinearGradient(0, 0, 0, 200);
+            gradJam.addColorStop(0, 'rgba(17,24,39,0.15)');
+            gradJam.addColorStop(1, 'rgba(17,24,39,0)');
+
+            const gradHadir = ctx.createLinearGradient(0, 0, 0, 200);
+            gradHadir.addColorStop(0, 'rgba(16,185,129,0.15)');
+            gradHadir.addColorStop(1, 'rgba(16,185,129,0)');
+
+            new Chart(ctx, {
                 type: 'line',
-                data: { labels, datasets: [
-                    { label:'Sakit', data: trenData.map(t=>parseInt(t.total_sakit)), borderColor:'#6366f1', borderWidth:2.5, backgroundColor:g, fill:true, tension:0.4, pointBackgroundColor:'#6366f1', pointBorderColor:'#fff', pointBorderWidth:2, pointRadius:4 },
-                    { label:'Izin', data: trenData.map(t=>parseInt(t.total_izin)), borderColor:'#fbbf24', borderWidth:2, fill:false, tension:0.4, pointBackgroundColor:'#fbbf24', pointBorderColor:'#fff', pointBorderWidth:2, pointRadius:4 },
-                    { label:'Alpa', data: trenData.map(t=>parseInt(t.total_alpa)), borderColor:'#f87171', borderWidth:2, fill:false, tension:0.4, pointBackgroundColor:'#f87171', pointBorderColor:'#fff', pointBorderWidth:2, pointRadius:4 }
-                ]},
-                options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#1e293b', bodyColor:'#fff', padding:10, callbacks:{ label: ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y}` }}},
-                    scales:{ x:{grid:{display:false},border:{display:false},ticks:{color:'#94a3b8',font:{size:11}}}, y:{min:0,grid:{color:'#f1f5f9'},border:{display:false},ticks:{color:'#94a3b8',font:{size:11},stepSize:5}} }}
-            });
-
-            // Pie Chart
-            const pieCtx = document.getElementById('pieChart').getContext('2d');
-            new Chart(pieCtx, {
-                type: 'pie',
-                data: { labels:['Sakit','Izin','Alpa'], datasets:[{ data:[{{ $totalSakit }},{{ $totalIzin }},{{ $totalAlpa }}], backgroundColor:['#3b82f6','#fbbf24','#f87171'], borderWidth:2, borderColor:'#fff', hoverOffset:6 }]},
-                options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{ backgroundColor:'#1e293b', bodyColor:'#fff', padding:10, callbacks:{ label: ctx=>` ${ctx.label}: ${ctx.parsed} hari` }}}}
+                data: {
+                    labels,
+                    datasets: [{
+                            label: 'Jam Mengajar',
+                            data: tren.map(t => parseInt(t.total_jam)),
+                            borderColor: '#111827',
+                            borderWidth: 2.5,
+                            backgroundColor: gradJam,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#111827',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            yAxisID: 'y',
+                        },
+                        {
+                            label: 'Kehadiran',
+                            data: tren.map(t => parseInt(t.total_hadir)),
+                            borderColor: '#10b981',
+                            borderWidth: 2,
+                            backgroundColor: gradHadir,
+                            fill: true,
+                            tension: 0.4,
+                            pointBackgroundColor: '#10b981',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4,
+                            yAxisID: 'y1',
+                        },
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#1e293b',
+                            bodyColor: '#fff',
+                            titleColor: '#94a3b8',
+                            padding: 10,
+                            callbacks: {
+                                label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()}`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        y: {
+                            position: 'left',
+                            grid: {
+                                color: '#f1f5f9'
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        y1: {
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#10b981',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        }
+                    }
+                }
             });
         });
     </script>

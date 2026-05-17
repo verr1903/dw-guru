@@ -21,6 +21,10 @@ Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
+Route::get('/logout', function () {
+    return view('auth.login');
+})->name('logout');
+
 
 // ===== HALAMAN FITUR =====
 Route::get('/jam-mengajar', [JamMengajarController::class, 'index'])->name('jam-mengajar');
@@ -34,4 +38,34 @@ Route::get('/pengaturan', function () {
 })->name('pengaturan');
 
 // ===== RESOURCE ROUTES (CRUD) =====
-Route::resource('guru', GuruController::class);
+
+Route::get('/dashboard/detail-bulan', [DashboardController::class, 'detailBulan'])
+    ->name('dashboard.detail-bulan');
+
+Route::get('/jam-mengajar/detail-guru', [JamMengajarController::class, 'detailGuru'])
+    ->name('jam-mengajar.detail-guru');
+
+     
+// ── Halaman Laporan (Download Center) ────────────────────────────────
+Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
+ 
+// ── Export: Rekap Kinerja (Dashboard) ────────────────────────────────
+Route::get('/laporan/export/dashboard/pdf',   [LaporanController::class, 'exportDashboardPdf'])
+    ->name('laporan.export.dashboard.pdf');
+ 
+Route::get('/laporan/export/dashboard/excel', [LaporanController::class, 'exportDashboardExcel'])
+    ->name('laporan.export.dashboard.excel');
+ 
+// ── Export: Jam Mengajar ──────────────────────────────────────────────
+Route::get('/laporan/export/jam/pdf',   [LaporanController::class, 'exportJamPdf'])
+    ->name('laporan.export.jam.pdf');
+ 
+Route::get('/laporan/export/jam/excel', [LaporanController::class, 'exportJamExcel'])
+    ->name('laporan.export.jam.excel');
+ 
+// ── Export: Kehadiran Guru ────────────────────────────────────────────
+Route::get('/laporan/export/kehadiran/pdf',   [LaporanController::class, 'exportKehadiranPdf'])
+    ->name('laporan.export.kehadiran.pdf');
+ 
+Route::get('/laporan/export/kehadiran/excel', [LaporanController::class, 'exportKehadiranExcel'])
+    ->name('laporan.export.kehadiran.excel');
