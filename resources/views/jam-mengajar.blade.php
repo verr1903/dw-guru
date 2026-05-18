@@ -13,6 +13,7 @@
                 <div class="relative">
                     <select name="tahun" onchange="this.form.submit()"
                         class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2.5 pr-9 text-sm font-medium text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer">
+                        <option value="all" {{ $tahun === 'all' ? 'selected' : '' }}>Semua Tahun</option>
                         @foreach($daftarTahun as $t)
                         <option value="{{ $t }}" {{ $tahun == $t ? 'selected' : '' }}>Tahun {{ $t }}</option>
                         @endforeach
@@ -35,7 +36,7 @@
             <h2 class="text-sm font-semibold text-gray-800 mb-0.5">Distribusi Jam Mengajar Per Guru</h2>
             <p class="text-xs text-gray-400 mb-4">
                 Porsi jam mengajar setiap guru
-                @if($tahun) tahun {{ $tahun }} @endif
+                {{ $isAll ? 'semua tahun' : 'tahun '.$tahun }}
                 @if($guru) &mdash; {{ $guru }} @endif
                 @if($mapel) &mdash; {{ $mapel }} @endif
             </p>
@@ -60,7 +61,7 @@
             <h2 class="text-sm font-semibold text-gray-800 mb-0.5">Beban Per Mata Pelajaran</h2>
             <p class="text-xs text-gray-400 mb-4">
                 Total jam mengajar per mata pelajaran
-                @if($tahun) tahun {{ $tahun }} @endif
+                {{ $isAll ? 'semua tahun' : 'tahun '.$tahun }}
             </p>
             <div class="relative" style="height:220px;">
                 <canvas id="barChart"></canvas>
@@ -251,7 +252,7 @@
                         <tr class="border-t border-gray-200 bg-gray-50">
                             <td colspan="2" class="py-2 px-0 text-xs font-bold text-gray-700">Total</td>
                             <td class="py-2 text-right text-xs font-bold text-gray-800" id="modalTotalJam">—</td>
-                            
+
                             <td></td>
                         </tr>
                     </tfoot>
@@ -286,9 +287,9 @@
                         totalHadir = 0;
 
                     rows.forEach(row => {
-                        const persen = row.jumlah_jam_mengajar > 0
-    ? Math.round((row.jumlah_kehadiran / row.jumlah_jam_mengajar) * 100)
-    : 0;
+                        const persen = row.jumlah_jam_mengajar > 0 ?
+                            Math.round((row.jumlah_kehadiran / row.jumlah_jam_mengajar) * 100) :
+                            0;
                         const color = persen >= 90 ? 'text-green-600' : persen >= 75 ? 'text-yellow-600' : 'text-red-500';
                         totalJam += row.jumlah_jam_mengajar;
 

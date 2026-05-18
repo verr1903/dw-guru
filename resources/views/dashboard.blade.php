@@ -13,6 +13,7 @@
                 <div class="relative">
                     <select name="tahun" onchange="this.form.submit()"
                         class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2.5 pr-9 text-sm font-medium text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer">
+                        <option value="all" {{ $tahun === 'all' ? 'selected' : '' }}>Semua Tahun</option>
                         @foreach($daftarTahun as $t)
                         <option value="{{ $t }}" {{ $tahun == $t ? 'selected' : '' }}>Tahun {{ $t }}</option>
                         @endforeach
@@ -36,32 +37,36 @@
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Jam Mengajar</p>
                     <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($totalJamMengajar) }}</p>
-                    <p class="text-xs text-gray-400 mt-1">jam · tahun {{ $tahun }}</p>
+                    <p class="text-xs text-gray-400 mt-1">jam · {{ $isAll ? 'semua tahun' : 'tahun '.$tahun }}</p>
                 </div>
                 <div class="w-11 h-11 rounded-xl bg-gray-900 flex items-center justify-center shrink-0">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
             </div>
             <div class="mt-4 flex items-center gap-1.5">
-                @if($persenPerubahanJam >= 0)
+                @if(!$isAll && $persenPerubahanJam !== null)
+                    @if($persenPerubahanJam >= 0)
                     <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-600">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
                         </svg>
                         {{ $persenPerubahanJam }}%
                     </span>
-                @else
+                    @else
                     <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-red-500">
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                         {{ abs($persenPerubahanJam) }}%
                     </span>
+                    @endif
+                    <span class="text-xs text-gray-400">vs {{ $tahun - 1 }}</span>
+                    @else
+                <span class="text-xs text-gray-400">Akumulasi seluruh tahun</span>
                 @endif
-                <span class="text-xs text-gray-400">vs {{ $tahun - 1 }}</span>
             </div>
         </div>
 
@@ -71,32 +76,32 @@
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Kehadiran Rata-rata</p>
                     <p class="text-3xl font-bold text-gray-900 mt-2">{{ $kehadiranRataRata }}<span class="text-lg font-semibold text-gray-400">%</span></p>
-                    <p class="text-xs text-gray-400 mt-1">tahun {{ $tahun }}</p>
+                    <p class="text-xs text-gray-400 mt-1">{{ $isAll ? 'semua tahun' : 'tahun '.$tahun }}</p>
                 </div>
                 <div class="w-11 h-11 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                 </div>
             </div>
             <div class="mt-4 flex items-center gap-1.5">
-                @if($persenPerubahanKehadiran >= 0)
-                    <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-600">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
-                        </svg>
-                        +{{ $persenPerubahanKehadiran }}pp
-                    </span>
+                @if(!$isAll && $persenPerubahanKehadiran !== null)
+                    @if($persenPerubahanKehadiran >= 0)
+                        <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-600">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                            +{{ $persenPerubahanKehadiran }}pp
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-red-500">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                            {{ $persenPerubahanKehadiran }}pp
+                        </span>
+                    @endif
+                    <span class="text-xs text-gray-400">vs {{ $tahun - 1 }} ({{ $kehadiranRataRataTahunLalu }}%)</span>
                 @else
-                    <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-red-500">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                        </svg>
-                        {{ $persenPerubahanKehadiran }}pp
-                    </span>
+                    <span class="text-xs text-gray-400">Akumulasi seluruh tahun</span>
                 @endif
-                <span class="text-xs text-gray-400">vs {{ $tahun - 1 }} ({{ $kehadiranRataRataTahunLalu }}%)</span>
             </div>
         </div>
 
@@ -106,22 +111,26 @@
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Guru Aktif</p>
                     <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($guruAktif) }}</p>
-                    <p class="text-xs text-gray-400 mt-1">guru · tahun {{ $tahun }}</p>
+                    <p class="text-xs text-gray-400 mt-1">guru · {{ $isAll ? 'semua tahun' : 'tahun '.$tahun }}</p>
                 </div>
                 <div class="w-11 h-11 rounded-xl bg-blue-500 flex items-center justify-center shrink-0">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                 </div>
             </div>
             <div class="mt-4 flex items-center gap-1.5">
-                @if($selisihGuruAktif >= 0)
-                    <span class="text-xs font-semibold text-emerald-600">+{{ $selisihGuruAktif }}</span>
+               @if(!$isAll && $selisihGuruAktif !== null)
+                    @if($selisihGuruAktif >= 0)
+                        <span class="text-xs font-semibold text-emerald-600">+{{ $selisihGuruAktif }}</span>
+                    @else
+                        <span class="text-xs font-semibold text-red-500">{{ $selisihGuruAktif }}</span>
+                    @endif
+                    <span class="text-xs text-gray-400">vs {{ $tahun - 1 }} ({{ $guruAktifTahunLalu }} guru)</span>
                 @else
-                    <span class="text-xs font-semibold text-red-500">{{ $selisihGuruAktif }}</span>
+                    <span class="text-xs text-gray-400">Akumulasi seluruh tahun</span>
                 @endif
-                <span class="text-xs text-gray-400">vs {{ $tahun - 1 }} ({{ $guruAktifTahunLalu }} guru)</span>
             </div>
         </div>
 
@@ -131,27 +140,31 @@
                 <div>
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Prestasi</p>
                     <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($totalPrestasi) }}</p>
-                    <p class="text-xs text-gray-400 mt-1">prestasi · tahun {{ $tahun }}</p>
+                    <p class="text-xs text-gray-400 mt-1">prestasi · {{ $isAll ? 'semua tahun' : 'tahun '.$tahun }}</p>
                 </div>
                 <div class="w-11 h-11 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                            d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                     </svg>
                 </div>
             </div>
             <div class="mt-4 flex items-center gap-1.5">
-                @if($selisihPrestasi >= 0)
-                    <span class="text-xs font-semibold text-emerald-600">+{{ $selisihPrestasi }}</span>
+               @if(!$isAll && $selisihPrestasi !== null)
+                    @if($selisihPrestasi >= 0)
+                        <span class="text-xs font-semibold text-emerald-600">+{{ $selisihPrestasi }}</span>
+                    @else
+                        <span class="text-xs font-semibold text-red-500">{{ $selisihPrestasi }}</span>
+                    @endif
+                    <span class="text-xs text-gray-400">vs {{ $tahun - 1 }} ({{ $totalPrestasiTahunLalu }} prestasi)</span>
                 @else
-                    <span class="text-xs font-semibold text-red-500">{{ $selisihPrestasi }}</span>
+                    <span class="text-xs text-gray-400">Akumulasi seluruh tahun</span>
                 @endif
-                <span class="text-xs text-gray-400">vs {{ $tahun - 1 }} ({{ $totalPrestasiTahunLalu }} prestasi)</span>
             </div>
         </div>
     </div>
 
-    
+
 
     {{-- ── Charts Row ───────────────────────────────────────────────────── --}}
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-8">
@@ -165,11 +178,11 @@
                 </div>
                 <div class="flex gap-2">
                     <button onclick="switchChart('bulan')" id="btnBulan"
-                            class="px-3 py-1 text-xs font-medium rounded-lg bg-gray-900 text-white transition-colors">
+                        class="px-3 py-1 text-xs font-medium rounded-lg bg-gray-900 text-white transition-colors">
                         Bulanan
                     </button>
                     <button onclick="switchChart('tahun')" id="btnTahun"
-                            class="px-3 py-1 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+                        class="px-3 py-1 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
                         Tahunan
                     </button>
                 </div>
@@ -218,7 +231,7 @@
                     </div>
                     <div class="w-full bg-gray-100 rounded-full h-1.5">
                         <div class="h-1.5 rounded-full bg-indigo-500 transition-all duration-500"
-                             style="width: {{ round(($guru->total_jam / $maxJam) * 100) }}%"></div>
+                            style="width: {{ round(($guru->total_jam / $maxJam) * 100) }}%"></div>
                     </div>
                     <p class="text-xs text-gray-400 mt-0.5">{{ $guru->bidang_studi ?? '-' }}</p>
                 </div>
@@ -236,7 +249,7 @@
                 <p class="text-xs text-gray-400 mt-0.5">Klik baris guru untuk melihat detail per bulan</p>
             </div>
             <form method="GET" action="{{ route('dashboard') }}" id="filterForm"
-                  class="flex flex-wrap items-center gap-2">
+                class="flex flex-wrap items-center gap-2">
                 <input type="hidden" name="tahun" value="{{ $tahun }}">
 
                 {{-- Bidang Studi --}}
@@ -245,12 +258,12 @@
                         class="appearance-none bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 pr-8 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer">
                         <option value="">Semua Mapel</option>
                         @foreach($daftarMapel as $m)
-                            <option value="{{ $m }}" {{ $mapel == $m ? 'selected' : '' }}>{{ $m }}</option>
+                        <option value="{{ $m }}" {{ $mapel == $m ? 'selected' : '' }}>{{ $m }}</option>
                         @endforeach
                     </select>
                     <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center">
                         <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </div>
                 </div>
@@ -258,21 +271,21 @@
                 {{-- Search --}}
                 <div class="relative">
                     <input type="text" name="search" value="{{ $search }}"
-                           placeholder="Cari guru..."
-                           class="bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-40">
+                        placeholder="Cari guru..."
+                        class="bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-40">
                     <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
 
                 <button type="submit"
-                        class="px-4 py-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium rounded-xl transition-colors">
+                    class="px-4 py-2 bg-gray-900 hover:bg-gray-700 text-white text-sm font-medium rounded-xl transition-colors">
                     Cari
                 </button>
 
                 @if($search || $mapel)
                 <a href="{{ route('dashboard', ['tahun' => $tahun]) }}"
-                   class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium rounded-xl transition-colors">
+                    class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-sm font-medium rounded-xl transition-colors">
                     Reset
                 </a>
                 @endif
@@ -295,9 +308,9 @@
                 <tbody class="divide-y divide-gray-50">
                     @forelse($guruData as $i => $row)
                     @php
-                        $totalAbsen  = ($row->total_sakit ?? 0) + ($row->total_izin ?? 0);
-                        $totalAbsensiAll = ($row->total_hadir ?? 0) + $totalAbsen + ($row->total_alfa ?? 0);
-                        $pctHadir    = $totalAbsensiAll > 0 ? round(($row->total_hadir / $totalAbsensiAll) * 100) : 0;
+                    $totalAbsen = ($row->total_sakit ?? 0) + ($row->total_izin ?? 0);
+                    $totalAbsensiAll = ($row->total_hadir ?? 0) + $totalAbsen + ($row->total_alfa ?? 0);
+                    $pctHadir = $totalAbsensiAll > 0 ? round(($row->total_hadir / $totalAbsensiAll) * 100) : 0;
                     @endphp
                     <tr class="hover:bg-indigo-50/40 transition-colors cursor-pointer group"
                         onclick="openModal({{ json_encode([
@@ -355,8 +368,8 @@
                             ]) }})"
                                 class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-indigo-600 hover:text-indigo-800 hover:bg-indigo-100 rounded-lg transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
                                 Detail
                             </button>
@@ -367,7 +380,7 @@
                                 <div class="w-20 bg-gray-100 rounded-full h-1.5">
                                     <div class="h-1.5 rounded-full
                                         {{ $pctHadir >= 90 ? 'bg-emerald-500' : ($pctHadir >= 75 ? 'bg-amber-400' : 'bg-red-400') }}"
-                                         style="width: {{ $pctHadir }}%"></div>
+                                        style="width: {{ $pctHadir }}%"></div>
                                 </div>
                                 <span class="text-xs font-bold whitespace-nowrap
                                     {{ $pctHadir >= 90 ? 'text-emerald-600' : ($pctHadir >= 75 ? 'text-amber-600' : 'text-red-500') }}">
@@ -378,13 +391,13 @@
 
                         <td class="px-5 py-4">
                             @if($pctHadir >= 90)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100 whitespace-nowrap">Sangat Baik</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100 whitespace-nowrap">Sangat Baik</span>
                             @elseif($pctHadir >= 75)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 whitespace-nowrap">Baik</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100 whitespace-nowrap">Baik</span>
                             @elseif($pctHadir >= 60)
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100 whitespace-nowrap">Cukup</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100 whitespace-nowrap">Cukup</span>
                             @else
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100 whitespace-nowrap">Perlu Perhatian</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-700 border border-red-100 whitespace-nowrap">Perlu Perhatian</span>
                             @endif
                         </td>
 
@@ -407,44 +420,44 @@
             </p>
             <div class="flex items-center gap-1">
                 @if($guruData->onFirstPage())
-                    <span class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 cursor-not-allowed">‹</span>
+                <span class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 cursor-not-allowed">‹</span>
                 @else
-                    <a href="{{ $guruData->previousPageUrl() }}#rekap-tabel"
-                       class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100">‹</a>
+                <a href="{{ $guruData->previousPageUrl() }}#rekap-tabel"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100">‹</a>
                 @endif
 
                 @php
-                    $currentPage = $guruData->currentPage();
-                    $lastPage    = $guruData->lastPage();
-                    $window      = 2;
-                    $pages       = collect();
-                    $pages->push(1);
-                    for ($p = max(2, $currentPage - $window); $p <= min($lastPage - 1, $currentPage + $window); $p++) {
-                        $pages->push($p);
+                $currentPage = $guruData->currentPage();
+                $lastPage = $guruData->lastPage();
+                $window = 2;
+                $pages = collect();
+                $pages->push(1);
+                for ($p = max(2, $currentPage - $window); $p <= min($lastPage - 1, $currentPage + $window); $p++) {
+                    $pages->push($p);
                     }
                     if ($lastPage > 1) $pages->push($lastPage);
                     $pages = $pages->unique()->sort()->values();
-                @endphp
+                    @endphp
 
-                @php $prev = null; @endphp
-                @foreach($pages as $p)
+                    @php $prev = null; @endphp
+                    @foreach($pages as $p)
                     @if($prev !== null && $p - $prev > 1)
-                        <span class="w-8 h-8 flex items-center justify-center text-xs text-gray-400">…</span>
+                    <span class="w-8 h-8 flex items-center justify-center text-xs text-gray-400">…</span>
                     @endif
                     <a href="{{ $guruData->url($p) }}#rekap-tabel"
-                       class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium
+                        class="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-medium
                               {{ $currentPage == $p ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100' }}">
                         {{ $p }}
                     </a>
                     @php $prev = $p; @endphp
-                @endforeach
+                    @endforeach
 
-                @if($guruData->hasMorePages())
+                    @if($guruData->hasMorePages())
                     <a href="{{ $guruData->nextPageUrl() }}#rekap-tabel"
-                       class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100">›</a>
-                @else
+                        class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100">›</a>
+                    @else
                     <span class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 cursor-not-allowed">›</span>
-                @endif
+                    @endif
             </div>
         </div>
     </div>
@@ -453,8 +466,8 @@
     {{-- ── MODAL DETAIL PER BULAN ──────────────────────────────────────── --}}
     {{-- ══════════════════════════════════════════════════════════════════ --}}
     <div id="modalOverlay"
-         class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
-         onclick="closeModal(event)">
+        class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden items-center justify-center p-4"
+        onclick="closeModal(event)">
 
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col" onclick="event.stopPropagation()">
 
@@ -462,7 +475,7 @@
             <div class="flex items-start justify-between px-6 py-5 border-b border-gray-100 shrink-0">
                 <div class="flex items-center gap-3">
                     <div id="modalAvatar"
-                         class="w-11 h-11 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-bold shrink-0">
+                        class="w-11 h-11 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-bold shrink-0">
                     </div>
                     <div>
                         <h3 id="modalNama" class="text-base font-bold text-gray-900"></h3>
@@ -471,7 +484,7 @@
                 </div>
                 <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors p-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
@@ -529,191 +542,250 @@
 
     @push('scripts')
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
 
-        const namaBulan = { 1:'Januari',2:'Februari',3:'Maret',4:'April',5:'Mei',6:'Juni',7:'Juli',8:'Agustus',9:'September',10:'Oktober',11:'November',12:'Desember' };
-        const namaBulanShort = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-        const bulanKeys = [1,2,3,4,5,6,7,8,9,10,11,12];
-        const rawBulan  = @json($trenJamPerBulan);
-        const rawTahun  = @json($trenJamPerTahun);
+            const namaBulan = {
+                1: 'Januari',
+                2: 'Februari',
+                3: 'Maret',
+                4: 'April',
+                5: 'Mei',
+                6: 'Juni',
+                7: 'Juli',
+                8: 'Agustus',
+                9: 'September',
+                10: 'Oktober',
+                11: 'November',
+                12: 'Desember'
+            };
+            const namaBulanShort = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            const bulanKeys = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+            const rawBulan = @json($trenJamPerBulan);
+            const rawTahun = @json($trenJamPerTahun);
 
-        const jamPerBulan = bulanKeys.map(b => rawBulan[b] ?? 0);
+            const jamPerBulan = bulanKeys.map(b => rawBulan[b] ?? 0);
 
-        // ── Chart Tren Jam ────────────────────────────────────────────
-        const ctxJam = document.getElementById('chartTrenJam')?.getContext('2d');
-        if (!ctxJam) return;
+            // ── Chart Tren Jam ────────────────────────────────────────────
+            const ctxJam = document.getElementById('chartTrenJam')?.getContext('2d');
+            if (!ctxJam) return;
 
-        const gradJam = ctxJam.createLinearGradient(0, 0, 0, 220);
-        gradJam.addColorStop(0, 'rgba(99,102,241,0.25)');
-        gradJam.addColorStop(1, 'rgba(99,102,241,0)');
+            const gradJam = ctxJam.createLinearGradient(0, 0, 0, 220);
+            gradJam.addColorStop(0, 'rgba(99,102,241,0.25)');
+            gradJam.addColorStop(1, 'rgba(99,102,241,0)');
 
-        let chartTren = new Chart(ctxJam, {
-            type: 'line',
-            data: {
-                labels: namaBulanShort,
-                datasets: [{
-                    label: 'Jam Mengajar',
-                    data: jamPerBulan,
-                    borderColor: '#6366f1',
-                    backgroundColor: gradJam,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#6366f1',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        backgroundColor: '#1e293b',
-                        titleColor: '#94a3b8',
-                        bodyColor: '#fff',
-                        padding: 10,
-                        callbacks: {
-                            label: ctx => ` ${ctx.parsed.y.toLocaleString('id-ID')} jam`
-                        }
-                    }
-                },
-                scales: {
-                    x: { grid: { display: false }, border: { display: false }, ticks: { color: '#94a3b8', font: { size: 11 } } },
-                    y: {
-                        grid: { color: '#f1f5f9' },
-                        border: { display: false },
-                        ticks: { color: '#94a3b8', font: { size: 11 }, callback: val => val >= 1000 ? (val/1000).toFixed(1)+'K' : val }
-                    }
-                }
-            }
-        });
-
-        window.switchChart = function(mode) {
-            const btnBulan = document.getElementById('btnBulan');
-            const btnTahun = document.getElementById('btnTahun');
-            if (mode === 'bulan') {
-                chartTren.data.labels = namaBulanShort;
-                chartTren.data.datasets[0].data = jamPerBulan;
-                btnBulan.className = 'px-3 py-1 text-xs font-medium rounded-lg bg-gray-900 text-white transition-colors';
-                btnTahun.className = 'px-3 py-1 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors';
-            } else {
-                chartTren.data.labels = Object.keys(rawTahun);
-                chartTren.data.datasets[0].data = Object.values(rawTahun);
-                btnTahun.className = 'px-3 py-1 text-xs font-medium rounded-lg bg-gray-900 text-white transition-colors';
-                btnBulan.className = 'px-3 py-1 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors';
-            }
-            chartTren.update();
-        };
-
-        // ── Chart Semester Donut ──────────────────────────────────────
-        const semData = @json($trenSemester->pluck('total_jam', 'semester'));
-        const ctxSem  = document.getElementById('chartSemester')?.getContext('2d');
-        if (ctxSem) {
-            new Chart(ctxSem, {
-                type: 'doughnut',
+            let chartTren = new Chart(ctxJam, {
+                type: 'line',
                 data: {
-                    labels: ['Semester 1', 'Semester 2'],
+                    labels: namaBulanShort,
                     datasets: [{
-                        data: [semData[1] ?? 0, semData[2] ?? 0],
-                        backgroundColor: ['#6366f1', '#fbbf24'],
-                        borderWidth: 0,
-                        hoverOffset: 6,
+                        label: 'Jam Mengajar',
+                        data: jamPerBulan,
+                        borderColor: '#6366f1',
+                        backgroundColor: gradJam,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#6366f1',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    cutout: '70%',
                     plugins: {
-                        legend: { display: false },
+                        legend: {
+                            display: false
+                        },
                         tooltip: {
                             backgroundColor: '#1e293b',
                             titleColor: '#94a3b8',
                             bodyColor: '#fff',
                             padding: 10,
-                            callbacks: { label: ctx => ` ${ctx.parsed.toLocaleString('id-ID')} jam` }
+                            callbacks: {
+                                label: ctx => ` ${ctx.parsed.y.toLocaleString('id-ID')} jam`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    size: 11
+                                }
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: '#f1f5f9'
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    size: 11
+                                },
+                                callback: val => val >= 1000 ? (val / 1000).toFixed(1) + 'K' : val
+                            }
                         }
                     }
                 }
             });
+
+            window.switchChart = function(mode) {
+                const btnBulan = document.getElementById('btnBulan');
+                const btnTahun = document.getElementById('btnTahun');
+                if (mode === 'bulan') {
+                    chartTren.data.labels = namaBulanShort;
+                    chartTren.data.datasets[0].data = jamPerBulan;
+                    btnBulan.className = 'px-3 py-1 text-xs font-medium rounded-lg bg-gray-900 text-white transition-colors';
+                    btnTahun.className = 'px-3 py-1 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors';
+                } else {
+                    chartTren.data.labels = Object.keys(rawTahun);
+                    chartTren.data.datasets[0].data = Object.values(rawTahun);
+                    btnTahun.className = 'px-3 py-1 text-xs font-medium rounded-lg bg-gray-900 text-white transition-colors';
+                    btnBulan.className = 'px-3 py-1 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors';
+                }
+                chartTren.update();
+            };
+
+            // ── Chart Semester Donut ──────────────────────────────────────
+            const semData = @json($trenSemester->pluck('total_jam', 'semester'));
+            const ctxSem = document.getElementById('chartSemester')?.getContext('2d');
+            if (ctxSem) {
+                new Chart(ctxSem, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Semester 1', 'Semester 2'],
+                        datasets: [{
+                            data: [semData[1] ?? 0, semData[2] ?? 0],
+                            backgroundColor: ['#6366f1', '#fbbf24'],
+                            borderWidth: 0,
+                            hoverOffset: 6,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: '#1e293b',
+                                titleColor: '#94a3b8',
+                                bodyColor: '#fff',
+                                padding: 10,
+                                callbacks: {
+                                    label: ctx => ` ${ctx.parsed.toLocaleString('id-ID')} jam`
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        // ── MODAL LOGIC ───────────────────────────────────────────────────────
+        const namaBulanFull = {
+            1: 'Januari',
+            2: 'Februari',
+            3: 'Maret',
+            4: 'April',
+            5: 'Mei',
+            6: 'Juni',
+            7: 'Juli',
+            8: 'Agustus',
+            9: 'September',
+            10: 'Oktober',
+            11: 'November',
+            12: 'Desember'
+        };
+
+        function openModal(guru) {
+            // Populate header
+            document.getElementById('modalAvatar').textContent = guru.nama.substring(0, 2).toUpperCase();
+            document.getElementById('modalNama').textContent = guru.nama;
+            const labelTahun = guru.tahun === 'all' ? 'Semua Tahun' : `Tahun ${guru.tahun}`;
+            document.getElementById('modalSubtitle').textContent = `NIP: ${guru.nip} · ${guru.bidang_studi} · ${labelTahun}`;
+
+            // Populate summary cards
+            document.getElementById('ms_jam').textContent = Number(guru.total_jam || 0).toLocaleString('id-ID') + ' jam';
+            document.getElementById('ms_hadir').textContent = guru.total_hadir ?? 0;
+            document.getElementById('ms_izin').textContent = ((guru.total_sakit ?? 0) + (guru.total_izin ?? 0));
+            document.getElementById('ms_alfa').textContent = guru.total_alfa ?? 0;
+
+            // Show modal
+            const overlay = document.getElementById('modalOverlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+
+            // Fetch detail per bulan
+            fetchDetailBulan(guru.id_guru, guru.tahun);
         }
-    });
 
-    // ── MODAL LOGIC ───────────────────────────────────────────────────────
-    const namaBulanFull = { 1:'Januari',2:'Februari',3:'Maret',4:'April',5:'Mei',6:'Juni',7:'Juli',8:'Agustus',9:'September',10:'Oktober',11:'November',12:'Desember' };
-
-    function openModal(guru) {
-        // Populate header
-        document.getElementById('modalAvatar').textContent = guru.nama.substring(0, 2).toUpperCase();
-        document.getElementById('modalNama').textContent = guru.nama;
-        document.getElementById('modalSubtitle').textContent = `NIP: ${guru.nip} · ${guru.bidang_studi} · Tahun ${guru.tahun}`;
-
-        // Populate summary cards
-        document.getElementById('ms_jam').textContent   = Number(guru.total_jam || 0).toLocaleString('id-ID') + ' jam';
-        document.getElementById('ms_hadir').textContent = guru.total_hadir ?? 0;
-        document.getElementById('ms_izin').textContent  = ((guru.total_sakit ?? 0) + (guru.total_izin ?? 0));
-        document.getElementById('ms_alfa').textContent  = guru.total_alfa ?? 0;
-
-        // Show modal
-        const overlay = document.getElementById('modalOverlay');
-        overlay.classList.remove('hidden');
-        overlay.classList.add('flex');
-
-        // Fetch detail per bulan
-        fetchDetailBulan(guru.id_guru, guru.tahun);
-    }
-
-    function closeModal(event) {
-        if (event && event.target !== document.getElementById('modalOverlay')) return;
-        const overlay = document.getElementById('modalOverlay');
-        overlay.classList.add('hidden');
-        overlay.classList.remove('flex');
-    }
-
-    // Override close button call (no event arg)
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
+        function closeModal(event) {
+            if (event && event.target !== document.getElementById('modalOverlay')) return;
             const overlay = document.getElementById('modalOverlay');
             overlay.classList.add('hidden');
             overlay.classList.remove('flex');
         }
-    });
 
-    function fetchDetailBulan(idGuru, tahun) {
-        const tbody   = document.getElementById('modalTableBody');
-        const loading = document.getElementById('modalLoading');
-        const errDiv  = document.getElementById('modalError');
-
-        // Reset
-        tbody.innerHTML = '';
-        errDiv.classList.add('hidden');
-        loading.classList.remove('hidden');
-
-        fetch(`{{ route('dashboard.detail-bulan') }}?id_guru=${idGuru}&tahun=${tahun}`, {
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
-        })
-        .then(r => {
-            if (!r.ok) throw new Error('Gagal memuat data');
-            return r.json();
-        })
-        .then(data => {
-            loading.classList.add('hidden');
-            if (!data.length) {
-                tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-gray-400 text-sm">Tidak ada data untuk periode ini.</td></tr>`;
-                return;
+        // Override close button call (no event arg)
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('modalOverlay');
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
             }
+        });
 
-            tbody.innerHTML = data.map(row => {
-                const izinTotal = (row.total_sakit ?? 0) + (row.total_izin ?? 0);
-                const allTotal  = (row.total_hadir ?? 0) + izinTotal + (row.total_alfa ?? 0);
-                const pct       = allTotal > 0 ? Math.round((row.total_hadir / allTotal) * 100) : 0;
-                const barColor  = pct >= 90 ? 'bg-emerald-500' : (pct >= 75 ? 'bg-amber-400' : 'bg-red-400');
-                const textColor = pct >= 90 ? 'text-emerald-600' : (pct >= 75 ? 'text-amber-600' : 'text-red-500');
+        function fetchDetailBulan(idGuru, tahun) {
+            const tbody = document.getElementById('modalTableBody');
+            const loading = document.getElementById('modalLoading');
+            const errDiv = document.getElementById('modalError');
 
-                return `<tr class="hover:bg-gray-50 transition-colors">
+            // Reset
+            tbody.innerHTML = '';
+            errDiv.classList.add('hidden');
+            loading.classList.remove('hidden');
+
+            fetch(`{{ route('dashboard.detail-bulan') }}?id_guru=${idGuru}&tahun=${tahun}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(r => {
+                    if (!r.ok) throw new Error('Gagal memuat data');
+                    return r.json();
+                })
+                .then(data => {
+                    loading.classList.add('hidden');
+                    if (!data.length) {
+                        tbody.innerHTML = `<tr><td colspan="7" class="px-4 py-8 text-center text-gray-400 text-sm">Tidak ada data untuk periode ini.</td></tr>`;
+                        return;
+                    }
+
+                    tbody.innerHTML = data.map(row => {
+                        const izinTotal = (row.total_sakit ?? 0) + (row.total_izin ?? 0);
+                        const allTotal = (row.total_hadir ?? 0) + izinTotal + (row.total_alfa ?? 0);
+                        const pct = allTotal > 0 ? Math.round((row.total_hadir / allTotal) * 100) : 0;
+                        const barColor = pct >= 90 ? 'bg-emerald-500' : (pct >= 75 ? 'bg-amber-400' : 'bg-red-400');
+                        const textColor = pct >= 90 ? 'text-emerald-600' : (pct >= 75 ? 'text-amber-600' : 'text-red-500');
+
+                        return `<tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-4 py-3 font-medium text-gray-700">${namaBulanFull[row.bulan] ?? row.bulan}</td>
                     <td class="px-4 py-3 text-right text-gray-800 font-semibold">${Number(row.total_jam_mengajar ?? 0).toLocaleString('id-ID')} <span class="text-xs font-normal text-gray-400">jam</span></td>
                     <td class="px-4 py-3 text-right">
@@ -743,14 +815,14 @@
                         </div>
                     </td>
                 </tr>`;
-            }).join('');
-        })
-        .catch(err => {
-            loading.classList.add('hidden');
-            errDiv.textContent = err.message;
-            errDiv.classList.remove('hidden');
-        });
-    }
+                    }).join('');
+                })
+                .catch(err => {
+                    loading.classList.add('hidden');
+                    errDiv.textContent = err.message;
+                    errDiv.classList.remove('hidden');
+                });
+        }
     </script>
     @endpush
 

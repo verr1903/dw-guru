@@ -12,13 +12,14 @@
             <div class="relative">
                 <select name="tahun" onchange="this.form.submit()"
                     class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2.5 pr-9 text-sm font-medium text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer">
+                    <option value="all" {{ $tahun === 'all' ? 'selected' : '' }}>Semua Tahun</option>
                     @foreach ($daftarTahun as $t)
-                        <option value="{{ $t }}" {{ $tahun == $t ? 'selected' : '' }}>{{ $t }}</option>
+                    <option value="{{ $t }}" {{ $tahun == $t ? 'selected' : '' }}>{{ $t }}</option>
                     @endforeach
                 </select>
                 <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </div>
             </div>
@@ -27,21 +28,21 @@
             <div class="relative">
                 <select name="bulan" onchange="this.form.submit()"
                     class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2.5 pr-9 text-sm font-medium text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer">
-                    <option value="">All</option>
+                    <option value="">Semua Bulan</option>
                     @foreach ($daftarBulan as $b)
-                        <option value="{{ $b }}" {{ $bulan == $b ? 'selected' : '' }}>{{ $namaBulan[$b] ?? $b }}</option>
+                    <option value="{{ $b }}" {{ $bulan == $b ? 'selected' : '' }}>{{ $namaBulan[$b] ?? $b }}</option>
                     @endforeach
                 </select>
                 <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center">
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </div>
             </div>
 
             {{-- Pencarian tersembunyi agar tidak hilang saat ganti filter --}}
             @if ($search)
-                <input type="hidden" name="search" value="{{ $search }}">
+            <input type="hidden" name="search" value="{{ $search }}">
             @endif
         </form>
     </div>
@@ -53,7 +54,9 @@
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Guru</p>
             <p class="text-3xl font-bold text-gray-900 mt-2">{{ $totalGuru }}</p>
-            <p class="text-xs text-gray-400 mt-1">Tenaga Pengajar</p>
+            <p class="text-xs text-gray-400 mt-0.5">
+               Total Guru — {{ $isAll ? 'Semua Tahun' : $tahun }}
+                </p>
         </div>
 
         {{-- Guru Hadir --}}
@@ -106,7 +109,7 @@
             <div class="flex items-center justify-between mb-5">
                 <div>
                     <h2 class="text-base font-semibold text-gray-900">Tren Kehadiran</h2>
-                    <p class="text-xs text-gray-400 mt-0.5">Persentase kehadiran guru per bulan — {{ $tahun }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">Persentase kehadiran guru per bulan — {{ $isAll ? 'Semua Tahun' : $tahun }}</p>
                 </div>
                 <span class="text-xs text-gray-400">% Kehadiran</span>
             </div>
@@ -119,7 +122,9 @@
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 lg:col-span-2">
             <div class="mb-4">
                 <h2 class="text-base font-semibold text-gray-900">Distribusi Status Kehadiran</h2>
-                <p class="text-xs text-gray-400 mt-0.5">Tahun {{ $tahun }}{{ $bulan ? ' — ' . ($namaBulan[$bulan] ?? $bulan) : '' }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">
+                    {{ $isAll ? 'Semua Tahun' : 'Tahun '.$tahun }}{{ $bulan ? ' — ' . ($namaBulan[$bulan] ?? $bulan) : '' }}
+                </p>
             </div>
             <div class="relative h-44 flex items-center justify-center">
                 <canvas id="donutChart"></canvas>
@@ -127,19 +132,19 @@
             {{-- Legend --}}
             <div class="grid grid-cols-3 gap-2 mt-5 text-center">
                 @php
-                    $grandTotal = $totalHadir + $totalIzin + $totalAlpha;
+                $grandTotal = $totalHadir + $totalIzin + $totalAlpha;
 
-                    $pHadir = $grandTotal > 0
-                        ? round(($totalHadir / $grandTotal) * 100, 1)
-                        : 0;
+                $pHadir = $grandTotal > 0
+                ? round(($totalHadir / $grandTotal) * 100, 1)
+                : 0;
 
-                    $pIzin = $grandTotal > 0
-                        ? round(($totalIzin / $grandTotal) * 100, 1)
-                        : 0;
+                $pIzin = $grandTotal > 0
+                ? round(($totalIzin / $grandTotal) * 100, 1)
+                : 0;
 
-                    $pAlfa = $grandTotal > 0
-                        ? round(($totalAlpha / $grandTotal) * 100, 1)
-                        : 0;
+                $pAlfa = $grandTotal > 0
+                ? round(($totalAlpha / $grandTotal) * 100, 1)
+                : 0;
                 @endphp
                 <div class="flex flex-col items-center gap-1">
                     <span class="w-3 h-3 rounded-full bg-blue-500 shrink-0"></span>
@@ -169,14 +174,14 @@
                 {{-- Preserve filters --}}
                 <input type="hidden" name="tahun" value="{{ $tahun }}">
                 @if ($bulan)
-                    <input type="hidden" name="bulan" value="{{ $bulan }}">
+                <input type="hidden" name="bulan" value="{{ $bulan }}">
                 @endif
                 <div class="relative">
                     <input type="text" name="search" value="{{ $search }}"
                         placeholder="Cari guru..."
                         class="bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-4 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-400 w-48">
                     <svg class="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
                 <button type="submit"
@@ -184,8 +189,8 @@
                     Cari
                 </button>
                 @if ($search)
-                    <a href="{{ route('kehadiran-guru', ['tahun' => $tahun, 'bulan' => $bulan]) }}"
-                        class="text-xs text-gray-400 hover:text-gray-600">Reset</a>
+                <a href="{{ route('kehadiran-guru', ['tahun' => $tahun, 'bulan' => $bulan]) }}"
+                    class="text-xs text-gray-400 hover:text-gray-600">Reset</a>
                 @endif
             </form>
         </div>
@@ -233,22 +238,22 @@
                         {{-- Total Izin --}}
                         <td class="px-6 py-4 text-right">
                             @if ($guru->total_izin > 0)
-                                <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100 min-w-[2.5rem]">
-                                    {{ $guru->total_izin }}
-                                </span>
+                            <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-100 min-w-[2.5rem]">
+                                {{ $guru->total_izin }}
+                            </span>
                             @else
-                                <span class="text-gray-300 font-medium">—</span>
+                            <span class="text-gray-300 font-medium">—</span>
                             @endif
                         </td>
 
                         {{-- Total Alfa --}}
                         <td class="px-6 py-4 text-right">
                             @if ($guru->total_alfa > 0)
-                                <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-100 min-w-[2.5rem]">
-                                    {{ $guru->total_alfa }}
-                                </span>
+                            <span class="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-100 min-w-[2.5rem]">
+                                {{ $guru->total_alfa }}
+                            </span>
                             @else
-                                <span class="text-gray-300 font-medium">—</span>
+                            <span class="text-gray-300 font-medium">—</span>
                             @endif
                         </td>
 
@@ -287,10 +292,10 @@
             <div class="flex items-center gap-1">
                 {{-- Prev --}}
                 @if ($ringkasanGuru->onFirstPage())
-                    <span class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 cursor-not-allowed text-xs">‹</span>
+                <span class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 cursor-not-allowed text-xs">‹</span>
                 @else
-                    <a href="{{ $ringkasanGuru->previousPageUrl() }}#detail-kehadiran"
-                        class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 text-xs">‹</a>
+                <a href="{{ $ringkasanGuru->previousPageUrl() }}#detail-kehadiran"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 text-xs">‹</a>
                 @endif
 
                 {{-- Pages --}}
@@ -300,31 +305,33 @@
                         {{ $ringkasanGuru->currentPage() == $i ? 'bg-gray-900 text-white' : 'text-gray-600 hover:bg-gray-100' }}">
                         {{ $i }}
                     </a>
-                @endfor
+                    @endfor
 
-                {{-- Next --}}
-                @if ($ringkasanGuru->hasMorePages())
+                    {{-- Next --}}
+                    @if ($ringkasanGuru->hasMorePages())
                     <a href="{{ $ringkasanGuru->nextPageUrl() }}#detail-kehadiran"
                         class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 text-xs">›</a>
-                @else
+                    @else
                     <span class="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 cursor-not-allowed text-xs">›</span>
-                @endif
+                    @endif
             </div>
         </div>
     </div>
 
     @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
 
-            const trenData   = @json($trenKehadiran);
+            const trenData = @json($trenKehadiran);
             const bulanNames = @json($namaBulan);
 
-            const labels = trenData.map(t =>
-                bulanNames[t.periode_bulan]
+            const isAll = {{ $isAll ? 'true' : 'false' }};
+            const labels = trenData.map(t => {
+                const namaBln = bulanNames[t.periode_bulan]
                     ? bulanNames[t.periode_bulan].substring(0, 3)
-                    : t.periode_bulan
-            );
+                    : t.periode_bulan;
+                return isAll && t.periode_tahun ? `${namaBln} ${t.periode_tahun}` : namaBln;
+            });
             const persenData = trenData.map(t => parseFloat(t.persen_kehadiran) || 0);
 
             // ── Line Chart: Tren Kehadiran (%) ──────────────────────────────
@@ -356,7 +363,9 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { display: false },
+                        legend: {
+                            display: false
+                        },
                         tooltip: {
                             backgroundColor: '#1e293b',
                             titleColor: '#94a3b8',
@@ -371,24 +380,42 @@
                             display: true,
                             align: 'top',
                             color: '#374151',
-                            font: { size: 10, weight: '600' },
+                            font: {
+                                size: 10,
+                                weight: '600'
+                            },
                             formatter: v => v.toFixed(2) + '%'
                         }
                     },
                     scales: {
                         x: {
-                            grid: { display: false },
-                            border: { display: false },
-                            ticks: { color: '#94a3b8', font: { size: 11 } }
+                            grid: {
+                                display: false
+                            },
+                            border: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    size: 11
+                                }
+                            }
                         },
                         y: {
                             min: 0,
                             max: 100,
-                            grid: { color: '#f1f5f9' },
-                            border: { display: false },
+                            grid: {
+                                color: '#f1f5f9'
+                            },
+                            border: {
+                                display: false
+                            },
                             ticks: {
                                 color: '#94a3b8',
-                                font: { size: 11 },
+                                font: {
+                                    size: 11
+                                },
                                 callback: v => v + '%'
                             }
                         }
@@ -415,7 +442,9 @@
                     maintainAspectRatio: false,
                     cutout: '65%',
                     plugins: {
-                        legend: { display: false },
+                        legend: {
+                            display: false
+                        },
                         tooltip: {
                             backgroundColor: '#1e293b',
                             titleColor: '#94a3b8',

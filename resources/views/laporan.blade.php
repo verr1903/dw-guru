@@ -11,6 +11,8 @@
             <div class="relative">
                 <select name="tahun" onchange="this.form.submit()"
                     class="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2.5 pr-9 text-sm font-medium text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-400 cursor-pointer">
+                    {{-- Tambahkan opsi semua tahun --}}
+                    <option value="semua" {{ $tahun === 'semua' ? 'selected' : '' }}>Semua Tahun</option>
                     @foreach($daftarTahun as $t)
                     <option value="{{ $t }}" {{ $tahun == $t ? 'selected' : '' }}>Tahun {{ $t }}</option>
                     @endforeach
@@ -39,7 +41,7 @@
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Total Jam Mengajar</p>
             <p class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($totalJamMengajar) }}</p>
-            <p class="text-xs text-gray-400 mt-1">jam · tahun {{ $tahun }}</p>
+            <p class="text-xs text-gray-400 mt-1">jam · {{ $isSemua ? 'semua tahun' : 'tahun '.$tahun }}</p>
         </div>
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <p class="text-xs font-medium text-gray-400 uppercase tracking-wide">Tingkat Kehadiran</p>
@@ -79,7 +81,9 @@
                     </div>
                     <div>
                         <p class="font-semibold text-gray-900 text-sm">Rekap Kinerja Guru</p>
-                        <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">Total jam, kehadiran, dan ringkasan kinerja seluruh guru tahun {{ $tahun }}</p>
+                        <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">
+                            Total jam, kehadiran, dan ringkasan kinerja seluruh guru {{ $isSemua ? 'semua tahun' : 'tahun '.$tahun }}
+                        </p>
                     </div>
                 </div>
 
@@ -129,7 +133,9 @@
                     </div>
                     <div>
                         <p class="font-semibold text-gray-900 text-sm">Jam Mengajar</p>
-                        <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">Detail beban jam mengajar per guru dan per mata pelajaran tahun {{ $tahun }}</p>
+                        <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">
+                            Detail beban jam mengajar per guru {{ $isSemua ? 'semua tahun' : 'tahun '.$tahun }}
+                        </p>
                     </div>
                 </div>
 
@@ -184,7 +190,9 @@
                     </div>
                     <div>
                         <p class="font-semibold text-gray-900 text-sm">Kehadiran Guru</p>
-                        <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">Data hadir, izin & alpa seluruh guru per bulan tahun {{ $tahun }}</p>
+                        <p class="text-xs text-gray-400 mt-0.5 leading-relaxed">
+                            Data hadir, izin & alpa seluruh guru {{ $isSemua ? 'per bulan tahun '.$tahun : 'semua tahun' }}
+                        </p>
                     </div>
                 </div>
 
@@ -237,7 +245,9 @@
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 lg:col-span-3">
             <div class="flex items-center justify-between mb-5">
                 <div>
-                    <h2 class="text-base font-semibold text-gray-900">Tren Bulanan {{ $tahun }}</h2>
+                    <h2 class="text-base font-semibold text-gray-900">
+                        Tren {{ $isSemua ? 'Semua Tahun' : 'Bulanan '.$tahun }}
+                    </h2>
                     <p class="text-xs text-gray-400 mt-0.5">Jam mengajar & kehadiran per bulan</p>
                 </div>
                 <div class="flex items-center gap-4 text-xs text-gray-500">
@@ -258,12 +268,15 @@
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden lg:col-span-2">
             <div class="px-5 py-4 border-b border-gray-100">
                 <h2 class="text-base font-semibold text-gray-900">Ringkasan per Bulan</h2>
-                <p class="text-xs text-gray-400 mt-0.5">Tahun {{ $tahun }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">{{ $isSemua ? 'Semua Tahun' : 'Tahun '.$tahun }}</p>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-xs">
                     <thead>
                         <tr class="bg-gray-50">
+                            @if($isSemua)
+                            <th class="px-4 py-2.5 text-left font-semibold text-gray-400 uppercase tracking-wider">Thn</th>
+                            @endif
                             <th class="px-4 py-2.5 text-left font-semibold text-gray-400 uppercase tracking-wider">Bln</th>
                             <th class="px-4 py-2.5 text-right font-semibold text-gray-400 uppercase tracking-wider">Jam</th>
                             <th class="px-4 py-2.5 text-right font-semibold text-gray-400 uppercase tracking-wider">Hadir</th>
@@ -274,6 +287,9 @@
                     <tbody class="divide-y divide-gray-50">
                         @forelse($trenBulan as $row)
                         <tr class="hover:bg-gray-50 transition-colors">
+                            @if($isSemua)
+                            <td class="px-4 py-2.5 font-medium text-gray-500">{{ $row->tahun }}</td>
+                            @endif
                             <td class="px-4 py-2.5 font-medium text-gray-700">{{ $namaBulan[$row->bulan] ?? $row->bulan }}</td>
                             <td class="px-4 py-2.5 text-right text-gray-700">{{ number_format($row->total_jam) }}</td>
                             <td class="px-4 py-2.5 text-right text-emerald-600 font-medium">{{ number_format($row->total_hadir) }}</td>
@@ -282,14 +298,14 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-6 text-center text-gray-400">Tidak ada data.</td>
+                            <td colspan="{{ $isSemua ? 6 : 5 }}" class="px-4 py-6 text-center text-gray-400">Tidak ada data.</td>
                         </tr>
                         @endforelse
                     </tbody>
                     @if($trenBulan->isNotEmpty())
                     <tfoot>
                         <tr class="bg-gray-50 font-semibold">
-                            <td class="px-4 py-2.5 text-gray-700">Total</td>
+                            <td class="px-4 py-2.5 text-gray-700" colspan="{{ $isSemua ? 2 : 1 }}">Total</td>
                             <td class="px-4 py-2.5 text-right text-gray-900">{{ number_format($trenBulan->sum('total_jam')) }}</td>
                             <td class="px-4 py-2.5 text-right text-emerald-600">{{ number_format($trenBulan->sum('total_hadir')) }}</td>
                             <td class="px-4 py-2.5 text-right text-amber-500">{{ number_format($trenBulan->sum('total_izin')) }}</td>
