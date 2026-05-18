@@ -130,7 +130,7 @@ class DashboardController extends Controller
             ->selectRaw('dim_guru.nama_guru, dim_guru.bidang_studi, SUM(fact_kinerja_guru.jumlah_jam_mengajar) as total_jam')
             ->groupBy('dim_guru.nama_guru', 'dim_guru.bidang_studi')
             ->orderByDesc('total_jam')
-            ->limit(5)
+            ->limit(10)
             ->get();
 
         // ── TABEL REKAP KINERJA GURU ──────────────────────────────────

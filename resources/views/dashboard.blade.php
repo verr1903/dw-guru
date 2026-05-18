@@ -48,23 +48,23 @@
             </div>
             <div class="mt-4 flex items-center gap-1.5">
                 @if(!$isAll && $persenPerubahanJam !== null)
-                    @if($persenPerubahanJam >= 0)
-                    <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-600">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-                        </svg>
-                        {{ $persenPerubahanJam }}%
-                    </span>
-                    @else
-                    <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-red-500">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
-                        {{ abs($persenPerubahanJam) }}%
-                    </span>
-                    @endif
-                    <span class="text-xs text-gray-400">vs {{ $tahun - 1 }}</span>
-                    @else
+                @if($persenPerubahanJam >= 0)
+                <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-600">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                    </svg>
+                    {{ $persenPerubahanJam }}%
+                </span>
+                @else
+                <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-red-500">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                    {{ abs($persenPerubahanJam) }}%
+                </span>
+                @endif
+                <span class="text-xs text-gray-400">vs {{ $tahun - 1 }}</span>
+                @else
                 <span class="text-xs text-gray-400">Akumulasi seluruh tahun</span>
                 @endif
             </div>
@@ -87,20 +87,24 @@
             </div>
             <div class="mt-4 flex items-center gap-1.5">
                 @if(!$isAll && $persenPerubahanKehadiran !== null)
-                    @if($persenPerubahanKehadiran >= 0)
-                        <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-600">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
-                            +{{ $persenPerubahanKehadiran }}pp
-                        </span>
-                    @else
-                        <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-red-500">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                            {{ $persenPerubahanKehadiran }}pp
-                        </span>
-                    @endif
-                    <span class="text-xs text-gray-400">vs {{ $tahun - 1 }} ({{ $kehadiranRataRataTahunLalu }}%)</span>
+                @if($persenPerubahanKehadiran >= 0)
+                <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-emerald-600">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                    </svg>
+                    +{{ $persenPerubahanKehadiran }}pp
+                </span>
                 @else
-                    <span class="text-xs text-gray-400">Akumulasi seluruh tahun</span>
+                <span class="inline-flex items-center gap-0.5 text-xs font-semibold text-red-500">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                    {{ $persenPerubahanKehadiran }}pp
+                </span>
+                @endif
+                <span class="text-xs text-gray-400">vs {{ $tahun - 1 }} ({{ $kehadiranRataRataTahunLalu }}%)</span>
+                @else
+                <span class="text-xs text-gray-400">Akumulasi seluruh tahun</span>
                 @endif
             </div>
         </div>
@@ -121,15 +125,15 @@
                 </div>
             </div>
             <div class="mt-4 flex items-center gap-1.5">
-               @if(!$isAll && $selisihGuruAktif !== null)
-                    @if($selisihGuruAktif >= 0)
-                        <span class="text-xs font-semibold text-emerald-600">+{{ $selisihGuruAktif }}</span>
-                    @else
-                        <span class="text-xs font-semibold text-red-500">{{ $selisihGuruAktif }}</span>
-                    @endif
-                    <span class="text-xs text-gray-400">vs {{ $tahun - 1 }} ({{ $guruAktifTahunLalu }} guru)</span>
+                @if(!$isAll && $selisihGuruAktif !== null)
+                @if($selisihGuruAktif >= 0)
+                <span class="text-xs font-semibold text-emerald-600">+{{ $selisihGuruAktif }}</span>
                 @else
-                    <span class="text-xs text-gray-400">Akumulasi seluruh tahun</span>
+                <span class="text-xs font-semibold text-red-500">{{ $selisihGuruAktif }}</span>
+                @endif
+                <span class="text-xs text-gray-400">vs {{ $tahun - 1 }} ({{ $guruAktifTahunLalu }} guru)</span>
+                @else
+                <span class="text-xs text-gray-400">Akumulasi seluruh tahun</span>
                 @endif
             </div>
         </div>
@@ -150,15 +154,15 @@
                 </div>
             </div>
             <div class="mt-4 flex items-center gap-1.5">
-               @if(!$isAll && $selisihPrestasi !== null)
-                    @if($selisihPrestasi >= 0)
-                        <span class="text-xs font-semibold text-emerald-600">+{{ $selisihPrestasi }}</span>
-                    @else
-                        <span class="text-xs font-semibold text-red-500">{{ $selisihPrestasi }}</span>
-                    @endif
-                    <span class="text-xs text-gray-400">vs {{ $tahun - 1 }} ({{ $totalPrestasiTahunLalu }} prestasi)</span>
+                @if(!$isAll && $selisihPrestasi !== null)
+                @if($selisihPrestasi >= 0)
+                <span class="text-xs font-semibold text-emerald-600">+{{ $selisihPrestasi }}</span>
                 @else
-                    <span class="text-xs text-gray-400">Akumulasi seluruh tahun</span>
+                <span class="text-xs font-semibold text-red-500">{{ $selisihPrestasi }}</span>
+                @endif
+                <span class="text-xs text-gray-400">vs {{ $tahun - 1 }} ({{ $totalPrestasiTahunLalu }} prestasi)</span>
+                @else
+                <span class="text-xs text-gray-400">Akumulasi seluruh tahun</span>
                 @endif
             </div>
         </div>
@@ -169,76 +173,100 @@
     {{-- ── Charts Row ───────────────────────────────────────────────────── --}}
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-8">
 
-        {{-- Tren Jam per Bulan --}}
-        <div class="xl:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h2 class="text-base font-semibold text-gray-900">Tren Jam Mengajar per Bulan</h2>
-                    <p class="text-xs text-gray-400 mt-0.5">Total jam seluruh guru · {{ $tahun }}</p>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="switchChart('bulan')" id="btnBulan"
-                        class="px-3 py-1 text-xs font-medium rounded-lg bg-gray-900 text-white transition-colors">
-                        Bulanan
-                    </button>
-                    <button onclick="switchChart('tahun')" id="btnTahun"
-                        class="px-3 py-1 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
-                        Tahunan
-                    </button>
-                </div>
-            </div>
-            <div class="relative h-56">
-                <canvas id="chartTrenJam"></canvas>
-            </div>
-        </div>
-
-        {{-- Semester Donut --}}
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <div class="mb-6">
-                <h2 class="text-base font-semibold text-gray-900">Distribusi Semester</h2>
-                <p class="text-xs text-gray-400 mt-0.5">Jam mengajar · {{ $tahun }}</p>
-            </div>
-            <div class="relative h-44">
-                <canvas id="chartSemester"></canvas>
-            </div>
-            <div class="flex justify-center gap-6 mt-4">
-                @foreach($trenSemester as $s)
-                <div class="text-center">
-                    <div class="w-3 h-3 rounded-full mx-auto mb-1 {{ $s->semester == 1 ? 'bg-indigo-500' : 'bg-amber-400' }}"></div>
-                    <p class="text-xs text-gray-500">Sem {{ $s->semester }}</p>
-                    <p class="text-sm font-bold text-gray-800">{{ number_format($s->total_jam) }}</p>
+        {{-- ── Top 10 Guru ───────────────────────────────────────────────────── --}}
+        <div class="xl:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col">
+            <h2 class="text-base font-semibold text-gray-900 mb-5">Top 10 Guru — Jam Mengajar {{ $tahun }}</h2>
+            <div class="space-y-3">
+                @php $maxJam = $topGuruJam->max('total_jam') ?: 1; @endphp
+                @foreach($topGuruJam as $i => $guru)
+                <div class="flex items-center gap-4">
+                    <span class="w-6 text-xs font-bold text-gray-400 shrink-0">{{ $i + 1 }}</span>
+                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold shrink-0">
+                        {{ strtoupper(substr($guru->nama_guru, 0, 2)) }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-medium text-gray-800 truncate">{{ $guru->nama_guru }}</span>
+                            <span class="text-sm font-bold text-gray-900 shrink-0 ml-2">{{ number_format($guru->total_jam) }} <span class="text-xs font-normal text-gray-400">jam</span></span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-1.5">
+                            <div class="h-1.5 rounded-full bg-indigo-500 transition-all duration-500"
+                                style="width: {{ round(($guru->total_jam / $maxJam) * 100) }}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-0.5">{{ $guru->bidang_studi ?? '-' }}</p>
+                    </div>
                 </div>
                 @endforeach
             </div>
         </div>
-    </div>
 
-    {{-- ── Top 5 Guru ───────────────────────────────────────────────────── --}}
-    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
-        <h2 class="text-base font-semibold text-gray-900 mb-5">Top 5 Guru — Jam Mengajar {{ $tahun }}</h2>
-        <div class="space-y-3">
-            @php $maxJam = $topGuruJam->max('total_jam') ?: 1; @endphp
-            @foreach($topGuruJam as $i => $guru)
-            <div class="flex items-center gap-4">
-                <span class="w-6 text-xs font-bold text-gray-400 shrink-0">{{ $i + 1 }}</span>
-                <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold shrink-0">
-                    {{ strtoupper(substr($guru->nama_guru, 0, 2)) }}
+        {{-- Semester Chart (ganti donut lama) --}}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div class="mb-5">
+                <h2 class="text-base font-semibold text-gray-900">Distribusi Semester</h2>
+                <p class="text-xs text-gray-400 mt-0.5">Jam mengajar · {{ $tahun }}</p>
+            </div>
+
+            {{-- Kartu ringkasan --}}
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                @php
+                $s1 = $trenSemester->firstWhere('semester', 1)->total_jam ?? 0;
+                $s2 = $trenSemester->firstWhere('semester', 2)->total_jam ?? 0;
+                $tot = $s1 + $s2;
+                $s1pct = $tot > 0 ? round($s1 / $tot * 100) : 0;
+                $s2pct = 100 - $s1pct;
+                @endphp
+                <div class="bg-gray-50 rounded-xl px-3 py-2.5 border-l-4 border-indigo-500">
+                    <p class="text-xs text-gray-400">Semester 1 <span class="text-gray-300">(Jan–Jun)</span></p>
+                    <p class="text-lg font-bold text-gray-900 mt-0.5">{{ number_format($s1) }} <span class="text-xs font-normal text-gray-400">jam</span></p>
+                    <p class="text-xs text-indigo-500 mt-0.5">{{ $s1pct }}% dari total</p>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-sm font-medium text-gray-800 truncate">{{ $guru->nama_guru }}</span>
-                        <span class="text-sm font-bold text-gray-900 shrink-0 ml-2">{{ number_format($guru->total_jam) }} <span class="text-xs font-normal text-gray-400">jam</span></span>
-                    </div>
-                    <div class="w-full bg-gray-100 rounded-full h-1.5">
-                        <div class="h-1.5 rounded-full bg-indigo-500 transition-all duration-500"
-                            style="width: {{ round(($guru->total_jam / $maxJam) * 100) }}%"></div>
-                    </div>
-                    <p class="text-xs text-gray-400 mt-0.5">{{ $guru->bidang_studi ?? '-' }}</p>
+                <div class="bg-gray-50 rounded-xl px-3 py-2.5 border-l-4 border-amber-400">
+                    <p class="text-xs text-gray-400">Semester 2 <span class="text-gray-300">(Jul–Des)</span></p>
+                    <p class="text-lg font-bold text-gray-900 mt-0.5">{{ number_format($s2) }} <span class="text-xs font-normal text-gray-400">jam</span></p>
+                    <p class="text-xs text-amber-500 mt-0.5">{{ $s2pct }}% dari total</p>
                 </div>
             </div>
-            @endforeach
+
+            {{-- Ratio bar --}}
+            <div class="flex h-2.5 rounded-full overflow-hidden mb-3">
+                <div class="bg-indigo-500 transition-all duration-700" style="width: {{ $s1pct }}%"></div>
+                <div class="bg-amber-400 flex-1"></div>
+            </div>
+            <div class="flex gap-4 text-xs text-gray-400 mb-5">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-indigo-500 inline-block"></span>Semester 1</span>
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-amber-400 inline-block"></span>Semester 2</span>
+            </div>
+
+            {{-- Bar per bulan --}}
+            <p class="text-xs font-medium text-gray-700 mb-3">Jam mengajar per bulan</p>
+            <div id="semesterMonthBars" class="space-y-1.5"></div>
         </div>
     </div>
+
+    {{-- Tren Jam per Bulan --}}
+    <div class="xl:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div class="flex items-center justify-between mb-6">
+            <div>
+                <h2 class="text-base font-semibold text-gray-900">Tren Jam Mengajar per Bulan</h2>
+                <p class="text-xs text-gray-400 mt-0.5">Total jam seluruh guru · {{ $tahun }}</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="switchChart('bulan')" id="btnBulan"
+                    class="px-3 py-1 text-xs font-medium rounded-lg bg-gray-900 text-white transition-colors">
+                    Bulanan
+                </button>
+                <button onclick="switchChart('tahun')" id="btnTahun"
+                    class="px-3 py-1 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+                    Tahunan
+                </button>
+            </div>
+        </div>
+        <div class="relative h-56">
+            <canvas id="chartTrenJam"></canvas>
+        </div>
+    </div>
+
 
     {{-- ── Tabel Rekap Kinerja Guru — 1 baris per guru ─────────────────── --}}
     <div id="rekap-tabel" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -659,42 +687,51 @@
                 chartTren.update();
             };
 
-            // ── Chart Semester Donut ──────────────────────────────────────
-            const semData = @json($trenSemester->pluck('total_jam', 'semester'));
-            const ctxSem = document.getElementById('chartSemester')?.getContext('2d');
-            if (ctxSem) {
-                new Chart(ctxSem, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Semester 1', 'Semester 2'],
-                        datasets: [{
-                            data: [semData[1] ?? 0, semData[2] ?? 0],
-                            backgroundColor: ['#6366f1', '#fbbf24'],
-                            borderWidth: 0,
-                            hoverOffset: 6,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '70%',
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                backgroundColor: '#1e293b',
-                                titleColor: '#94a3b8',
-                                bodyColor: '#fff',
-                                padding: 10,
-                                callbacks: {
-                                    label: ctx => ` ${ctx.parsed.toLocaleString('id-ID')} jam`
-                                }
-                            }
-                        }
+            // ── Chart Distribusi Semester — bar per bulan ─────────────────
+            (function() {
+                const rawBulan = @json($trenJamPerBulan);
+                const BULAN_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+                const months = BULAN_SHORT.map((label, i) => ({
+                    label,
+                    jam: rawBulan[i + 1] ?? 0,
+                    sem: i < 6 ? 1 : 2,
+                }));
+
+                const maxJam = Math.max(...months.map(m => m.jam), 1);
+                const container = document.getElementById('semesterMonthBars');
+                if (!container) return;
+
+                let prevSem = null;
+                months.forEach((m, i) => {
+                    if (m.sem !== prevSem) {
+                        const d = document.createElement('p');
+                        d.className = 'text-xs text-gray-400 text-center py-1';
+                        d.textContent = m.sem === 1 ? '— Semester 1 —' : '— Semester 2 —';
+                        container.appendChild(d);
+                        prevSem = m.sem;
                     }
+
+                    const color = m.sem === 1 ? '#6366f1' : '#f59e0b';
+                    const pct = Math.round(m.jam / maxJam * 100);
+
+                    const row = document.createElement('div');
+                    row.className = 'flex items-center gap-2';
+                    row.innerHTML = `
+                        <span class="text-xs text-gray-400 w-6 text-right shrink-0">${m.label}</span>
+                        <div class="flex-1 bg-gray-100 rounded h-5 relative overflow-hidden">
+                            <div class="month-bar h-full rounded flex items-center px-2 transition-all duration-500"
+                                style="width:0%;background:${color};" data-w="${pct}">
+                                <span class="text-xs font-medium text-white">${m.jam.toLocaleString('id-ID')}</span>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(row);
+
+                    setTimeout(() => {
+                        row.querySelector('.month-bar').style.width = pct + '%';
+                    }, 60 + i * 40);
                 });
-            }
+            })();
         });
 
         // ── MODAL LOGIC ───────────────────────────────────────────────────────
