@@ -31,28 +31,23 @@
     {{-- ===== ROW 1: DONUT + BAR ===== --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
 
-        {{-- Distribusi Jam Mengajar Per Guru (Donut) --}}
+
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <h2 class="text-sm font-semibold text-gray-800 mb-0.5">Distribusi Jam Mengajar Per Guru</h2>
-            <p class="text-xs text-gray-400 mb-4">
-                Porsi jam mengajar setiap guru
-                {{ $isAll ? 'semua tahun' : 'tahun '.$tahun }}
-                @if($guru) &mdash; {{ $guru }} @endif
-                @if($mapel) &mdash; {{ $mapel }} @endif
-            </p>
-            <div class="flex gap-4">
-                {{-- Canvas --}}
-                <div class="relative flex-shrink-0" style="width:220px; height:220px;">
-                    <canvas id="donutChart"></canvas>
-                    {{-- Center label --}}
-                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                        <span class="text-xs text-gray-400">Total</span>
-                        <span class="text-lg font-bold text-gray-800" id="donutTotal">—</span>
-                        <span class="text-xs text-gray-400">jam</span>
-                    </div>
+            {{-- Line Chart --}}
+            <div class="flex items-center justify-between mb-0.5">
+                <h2 class="text-sm font-semibold text-gray-800">Total Jam Mengajar Per Bulan</h2>
+                <div class="flex items-center gap-4 text-xs text-gray-500">
+                    <span class="flex items-center gap-1.5">
+                        <span class="inline-block w-5 h-0.5 bg-green-500 rounded"></span> Jam Mengajar
+                    </span>
+                    <span class="flex items-center gap-1.5">
+                        <span class="inline-block w-5 h-0.5 bg-red-400 rounded"></span> Kehadiran
+                    </span>
                 </div>
-                {{-- Legend scrollable --}}
-                <div class="flex-1 overflow-y-auto max-h-52 space-y-1.5 pr-1" id="donutLegend"></div>
+            </div>
+            <p class="text-xs text-gray-400 mb-4">Perbandingan jam mengajar dan kehadiran per bulan</p>
+            <div class="relative" style="height:240px;">
+                <canvas id="lineChart"></canvas>
             </div>
         </div>
 
@@ -72,23 +67,36 @@
     {{-- ===== ROW 2: LINE CHART + TABLE (side by side, like Power BI) ===== --}}
     <div class="grid grid-cols-1 lg:grid-cols-1 gap-5 mb-5">
 
-        {{-- Line Chart --}}
+        {{-- Distribusi Jam Mengajar Per Guru (Donut) --}}
+        {{-- Distribusi Jam Mengajar Per Guru (Horizontal Bar) --}}
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-            <div class="flex items-center justify-between mb-0.5">
-                <h2 class="text-sm font-semibold text-gray-800">Total Jam Mengajar Per Bulan</h2>
-                <div class="flex items-center gap-4 text-xs text-gray-500">
-                    <span class="flex items-center gap-1.5">
-                        <span class="inline-block w-5 h-0.5 bg-green-500 rounded"></span> Jam Mengajar
-                    </span>
-                    <span class="flex items-center gap-1.5">
-                        <span class="inline-block w-5 h-0.5 bg-red-400 rounded"></span> Kehadiran
-                    </span>
+            <h2 class="text-sm font-semibold text-gray-800 mb-0.5">Distribusi Jam Mengajar Per Guru</h2>
+            <p class="text-xs text-gray-400 mb-4">
+                Perbandingan jam mengajar tiap guru
+                {{ $isAll ? 'semua tahun' : 'tahun '.$tahun }}
+            </p>
+
+            {{-- Metric summary --}}
+            <div class="grid grid-cols-3 gap-3 mb-5">
+                <div class="bg-gray-50 rounded-xl px-3 py-2.5">
+                    <p class="text-xs text-gray-400">Total jam</p>
+                    <p class="text-base font-semibold text-gray-800" id="distTotal">—</p>
+                </div>
+                <div class="bg-gray-50 rounded-xl px-3 py-2.5">
+                    <p class="text-xs text-gray-400">Terbanyak</p>
+                    <p class="text-base font-semibold text-gray-800" id="distTopJam">—</p>
+                    <p class="text-xs text-gray-400 truncate" id="distTopName">—</p>
+                </div>
+                <div class="bg-gray-50 rounded-xl px-3 py-2.5">
+                    <p class="text-xs text-gray-400">Rata-rata</p>
+                    <p class="text-base font-semibold text-gray-800" id="distAvg">—</p>
                 </div>
             </div>
-            <p class="text-xs text-gray-400 mb-4">Perbandingan jam mengajar dan kehadiran per bulan</p>
-            <div class="relative" style="height:240px;">
-                <canvas id="lineChart"></canvas>
-            </div>
+
+            {{-- Bar chart container --}}
+            <div id="distribusiChart" class="space-y-2"></div>
+
+            
         </div>
 
         {{-- Detail Table (scrollable, compact) --}}
@@ -326,10 +334,8 @@
 
             // ── Warna palette ───────────────────────────────────────────
             const PALETTE = [
-                '#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f',
-                '#edc948', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac',
-                '#d4a6c8', '#8cd17d', '#86bcb6', '#f1ce63', '#a0cbe8',
-                '#ffbe7d', '#fabfd2', '#b6992d', '#499894', '#e05c68',
+                '#4e79a7', '#f28e2b', '#e15759', '#76b7b2',
+                '#59a14f', '#b07aa1', '#ff9da7', '#9c755f', '#bab0ac',
             ];
 
             // ── DATA dari Blade ─────────────────────────────────────────────
@@ -338,186 +344,7 @@
             const trenBulan = @json($trenPerBulan);
 
             // ============================================================
-            // CHART 1 — Donut: Distribusi Per Guru
-            // ============================================================
-            (function() {
-                if (!distribusiGuru.length) return;
-
-                const ctx = document.getElementById('donutChart').getContext('2d');
-                const labels = distribusiGuru.map(g => g.nama_guru);
-                const data = distribusiGuru.map(g => g.total_jam);
-                const persentase = distribusiGuru.map(g => g.persentase);
-                const total = data.reduce((a, b) => a + b, 0);
-
-                document.getElementById('donutTotal').textContent = total.toLocaleString('id-ID');
-
-                // Custom legend: nama + jam + persen (matches Power BI)
-                const legendEl = document.getElementById('donutLegend');
-                labels.forEach((label, i) => {
-                    const div = document.createElement('div');
-                    div.className = 'flex items-center gap-2 text-xs text-gray-700';
-                    div.innerHTML = `
-                    <span class="inline-block w-3 h-3 rounded-sm flex-shrink-0" style="background:${PALETTE[i % PALETTE.length]}"></span>
-                    <span class="flex-1 truncate" title="${label}">${label}</span>
-                    <span class="text-gray-500 tabular-nums">${data[i].toLocaleString('id-ID')}</span>
-                    <span class="font-semibold text-gray-700 tabular-nums w-8 text-right">(${persentase[i]}%)</span>
-                `;
-                    legendEl.appendChild(div);
-                });
-
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels,
-                        datasets: [{
-                            data,
-                            backgroundColor: labels.map((_, i) => PALETTE[i % PALETTE.length]),
-                            borderWidth: 1.5,
-                            borderColor: '#fff',
-                            hoverOffset: 8,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        cutout: '55%',
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                backgroundColor: '#1e293b',
-                                padding: 10,
-                                callbacks: {
-                                    label: ctx => {
-                                        const pct = persentase[ctx.dataIndex];
-                                        return ` ${ctx.label}: ${ctx.parsed.toLocaleString('id-ID')} jam (${pct}%)`;
-                                    }
-                                }
-                            },
-                            // Show jam value on each segment (like Power BI)
-                            datalabels: false,
-                        }
-                    },
-                    plugins: [{
-                        // Draw jam value on each arc segment
-                        id: 'arcLabels',
-                        afterDatasetsDraw(chart) {
-                            const {
-                                ctx,
-                                data
-                            } = chart;
-                            const meta = chart.getDatasetMeta(0);
-                            meta.data.forEach((arc, i) => {
-                                const val = data.datasets[0].data[i];
-                                if (!val) return;
-                                const angle = (arc.startAngle + arc.endAngle) / 2;
-                                const r = (arc.outerRadius + arc.innerRadius) / 2;
-                                const x = arc.x + Math.cos(angle) * r;
-                                const y = arc.y + Math.sin(angle) * r;
-                                ctx.save();
-                                ctx.font = 'bold 9px system-ui';
-                                ctx.fillStyle = '#fff';
-                                ctx.textAlign = 'center';
-                                ctx.textBaseline = 'middle';
-                                // Only draw if arc is wide enough
-                                const sweep = arc.endAngle - arc.startAngle;
-                                if (sweep > 0.25) {
-                                    ctx.fillText(val.toLocaleString('id-ID'), x, y);
-                                }
-                                ctx.restore();
-                            });
-                        }
-                    }]
-                });
-            })();
-
-            // ============================================================
-            // CHART 2 — Bar: Beban Per Mata Pelajaran (warna-warni)
-            // ============================================================
-            (function() {
-                if (!bebanMapel.length) return;
-
-                const ctx = document.getElementById('barChart').getContext('2d');
-                const labels = bebanMapel.map(m => {
-                    const l = m.nama_mata_pelajaran || 'Tidak Diketahui';
-                    return l.length > 14 ? l.substring(0, 14) + '…' : l;
-                });
-                const data = bebanMapel.map(m => m.total_jam);
-
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels,
-                        datasets: [{
-                            data,
-                            backgroundColor: labels.map((_, i) => PALETTE[i % PALETTE.length]),
-                            borderRadius: 3,
-                            borderSkipped: false,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                backgroundColor: '#1e293b',
-                                padding: 10,
-                                callbacks: {
-                                    title: items => bebanMapel[items[0].dataIndex]?.nama_mata_pelajaran ?? '',
-                                    label: ctx => ` ${ctx.parsed.y.toLocaleString('id-ID')} jam`,
-                                }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                grid: {
-                                    display: false
-                                },
-                                border: {
-                                    display: false
-                                },
-                                ticks: {
-                                    color: '#94a3b8',
-                                    font: {
-                                        size: 8
-                                    },
-                                    maxRotation: 45
-                                }
-                            },
-                            y: {
-                                grid: {
-                                    color: '#f1f5f9'
-                                },
-                                border: {
-                                    display: false
-                                },
-                                ticks: {
-                                    color: '#94a3b8',
-                                    font: {
-                                        size: 10
-                                    }
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Jumlah Jam Mengajar',
-                                    color: '#94a3b8',
-                                    font: {
-                                        size: 10
-                                    }
-                                },
-                                min: 0,
-                            }
-                        }
-                    }
-                });
-            })();
-
-            // ============================================================
-            // CHART 3 — Line: Tren Per Bulan (2 garis — mirip Power BI)
+            // CHART 1 — Line: Tren Per Bulan (2 garis — mirip Power BI)
             // ============================================================
             (function() {
                 if (!trenBulan.length) return;
@@ -620,6 +447,136 @@
                             }
                         }
                     }
+                });
+            })();
+
+            // ============================================================
+            // CHART 2 — Bar: Beban Per Mata Pelajaran (warna-warni)
+            // ============================================================
+            (function() {
+                if (!bebanMapel.length) return;
+
+                const ctx = document.getElementById('barChart').getContext('2d');
+                const labels = bebanMapel.map(m => {
+                    const l = m.nama_mata_pelajaran || 'Tidak Diketahui';
+                    return l.length > 14 ? l.substring(0, 14) + '…' : l;
+                });
+                const data = bebanMapel.map(m => m.total_jam);
+
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            data,
+                            backgroundColor: labels.map((_, i) => PALETTE[i % PALETTE.length]),
+                            borderRadius: 3,
+                            borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: '#1e293b',
+                                padding: 10,
+                                callbacks: {
+                                    title: items => bebanMapel[items[0].dataIndex]?.nama_mata_pelajaran ?? '',
+                                    label: ctx => ` ${ctx.parsed.y.toLocaleString('id-ID')} jam`,
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                border: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    font: {
+                                        size: 8
+                                    },
+                                    maxRotation: 45
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    color: '#f1f5f9'
+                                },
+                                border: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#94a3b8',
+                                    font: {
+                                        size: 10
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Jumlah Jam Mengajar',
+                                    color: '#94a3b8',
+                                    font: {
+                                        size: 10
+                                    }
+                                },
+                                min: 0,
+                            }
+                        }
+                    }
+                });
+            })();
+
+            // ============================================================
+            // CHART 3 — Horizontal Bar: Distribusi Per Guru
+            (function() {
+                if (!distribusiGuru.length) return;
+
+                const total = distribusiGuru.reduce((s, d) => s + d.total_jam, 0);
+                const avg = Math.round(total / distribusiGuru.length);
+                const maxJam = distribusiGuru[0].total_jam;
+
+                document.getElementById('distTotal').textContent = total.toLocaleString('id-ID');
+                document.getElementById('distTopJam').textContent = distribusiGuru[0].total_jam + ' jam';
+                document.getElementById('distTopName').textContent = distribusiGuru[0].nama_guru;
+                document.getElementById('distAvg').textContent = avg.toLocaleString('id-ID') + ' jam';
+
+                const container = document.getElementById('distribusiChart');
+
+                distribusiGuru.forEach((d, i) => {
+                    const isAbove = d.total_jam >= avg;
+                    const color = PALETTE[i % PALETTE.length]; 
+                    const pct = Math.round((d.total_jam / maxJam) * 100);
+                    const avgPct = Math.round((avg / maxJam) * 100);
+
+                    const row = document.createElement('div');
+                    row.className = 'flex items-center gap-2';
+                    row.innerHTML = `
+            <span class="text-xs text-gray-500 w-32 text-right truncate shrink-0" title="${d.nama_guru}">${d.nama_guru}</span>
+            <div class="flex-1 relative bg-gray-100 rounded h-7">
+                <div class="bar-fill h-full rounded flex items-center justify-end pr-2 transition-all duration-700"
+                     style="width:0%; background:${color};" data-width="${pct}">
+                    <span class="text-xs font-semibold text-white">${d.total_jam}</span>
+                </div>
+                <div class="absolute top-0 bottom-0 w-px bg-amber-400 opacity-60 pointer-events-none"
+                     style="left:${avgPct}%"></div>
+                ${i === 0 ? `<span class="absolute -top-4 text-[10px] text-amber-600" style="left:${avgPct}%; transform:translateX(-50%)">⌀ rata-rata</span>` : ''}
+            </div>
+            <span class="text-xs font-semibold w-8 text-right" style="color:${color}">${d.persentase}%</span>
+        `;
+                    container.appendChild(row);
+
+                    // Animate
+                    setTimeout(() => {
+                        row.querySelector('.bar-fill').style.width = pct + '%';
+                    }, 80 + i * 60);
                 });
             })();
 
